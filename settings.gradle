@@ -1,0 +1,3 @@
+rootProject.name = 'libtory-backend'
+include 'libtory-core'
+
