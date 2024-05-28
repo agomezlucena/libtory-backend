@@ -1,6 +1,5 @@
-package io.github.agomezlucena.libtory.books.domain.valueobjects;
+package io.github.agomezlucena.libtory.books.domain;
 
-import io.github.agomezlucena.libtory.books.domain.errors.InvalidIsbn;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -11,22 +10,29 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+@DisplayName("ISBN should")
 class IsbnTest {
     @ParameterizedTest(name = "rule: {0}")
     @MethodSource("validInputs")
-    @DisplayName("should allow create a valid ISBN")
-    void shouldAllowCreateAValidISBN(String ruleName, String givenIsbnLiteral) {
-        PublicationId obtainedValue = Isbn.fromIsbnString(givenIsbnLiteral);
+    @DisplayName("allow create a valid ISBN")
+    void shouldAllowCreateAValidISBN(
+            @SuppressWarnings("unused") String ruleName,
+            String givenIsbnLiteral
+    ) {
+        Isbn obtainedValue = Isbn.fromString(givenIsbnLiteral);
         assertNotNull(obtainedValue);
-        assertEquals(givenIsbnLiteral, obtainedValue.getId());
+        assertEquals(givenIsbnLiteral, obtainedValue.getValue());
     }
 
     @ParameterizedTest(name = "rule: {0}")
     @MethodSource("invalidInputs")
-    @DisplayName("should not allow create a invalid ISBN")
-    void shouldNotAllowCreateAInvalidISBN(String ruleName, String givenIsbnLiteral) {
+    @DisplayName("not allow create a invalid ISBN")
+    void shouldNotAllowCreateAInvalidISBN(
+            @SuppressWarnings("unused") String ruleName,
+            String givenIsbnLiteral
+    ) {
         String expectedMessage = String.format("ISBN: %s is invalid",givenIsbnLiteral);
-        InvalidIsbn obtainedValue = assertThrows(InvalidIsbn.class,()->Isbn.fromIsbnString(givenIsbnLiteral));
+        InvalidIsbn obtainedValue = assertThrows(InvalidIsbn.class,()->Isbn.fromString(givenIsbnLiteral));
         assertEquals(expectedMessage, obtainedValue.getMessage());
     }
 

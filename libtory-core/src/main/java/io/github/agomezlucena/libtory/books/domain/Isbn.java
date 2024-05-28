@@ -1,6 +1,4 @@
-package io.github.agomezlucena.libtory.books.domain.valueobjects;
-
-import io.github.agomezlucena.libtory.books.domain.errors.InvalidIsbn;
+package io.github.agomezlucena.libtory.books.domain;
 
 import java.util.regex.Pattern;
 
@@ -20,13 +18,15 @@ import java.util.regex.Pattern;
  *
  * @author Alejandro Gómez Lucena.
  */
-public class Isbn extends PublicationId {
+public class Isbn  {
     private static final String ISBN_13_ATOM = "^97[89]-\\d-(\\d{2}-\\d{6}|\\d{3}-\\d{5})-\\d$";
     private static final String ISBN_13_PATTERN_STRING = String.format("(%s|^(978|979)\\d{10}$)", ISBN_13_ATOM);
     private static final Pattern ISBN_PATTERN = Pattern.compile(ISBN_13_PATTERN_STRING);
 
+    private final String isbnLiteral;
+
     private Isbn(String id) {
-        super(id);
+        this.isbnLiteral = id;
     }
 
     /**
@@ -50,6 +50,10 @@ public class Isbn extends PublicationId {
             throw new InvalidIsbn(isbn);
         }
         return new Isbn(isbn);
+    }
+
+    public String getValue(){
+        return isbnLiteral;
     }
 
     private static boolean hasValidChecksumDigit(String isbn) {

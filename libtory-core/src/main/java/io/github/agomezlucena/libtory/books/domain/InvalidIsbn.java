@@ -1,4 +1,4 @@
-package io.github.agomezlucena.libtory.books.domain.errors;
+package io.github.agomezlucena.libtory.books.domain;
 
 public class InvalidIsbn extends RuntimeException {
     public InvalidIsbn(final String isbn) {
