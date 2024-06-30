@@ -1,6 +1,5 @@
-plugins {
-    id 'java'
-}
+apply plugin: 'java'
+apply plugin: 'java-test-fixtures'
 
 group = 'io.github.agomezlucena'
 version = '1.0-SNAPSHOT'
@@ -10,11 +9,9 @@ repositories {
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testImplementation 'org.mockito:mockito-core:5.11.0'
-}
-
-test {
-    useJUnitPlatform()
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation "net.datafaker:datafaker:${datafakerVersion}"
+    testFixturesApi "net.datafaker:datafaker:${datafakerVersion}"
+    testFixturesApi "org.junit.jupiter:junit-jupiter:${junitVersion}"
 }
