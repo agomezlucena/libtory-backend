@@ -12,6 +12,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @DisplayName("ISBN should")
 class IsbnTest {
+
     @ParameterizedTest(name = "rule: {0}")
     @MethodSource("validInputs")
     @DisplayName("allow create a valid ISBN")
@@ -52,7 +53,8 @@ class IsbnTest {
                 arguments("must not admit blank values","                               "),
                 arguments("must not admit letters","abc-a-23-asdfasd-1"),
                 arguments("must not admit isbn with invalid checksum digit","978-0-13-468599-2"),
-                arguments("must not admit isbn string of 13 digits cheksum digit","9780134685993")
+                arguments("must not admit isbn string of 13 digits cheksum digit","9780134685993"),
+                arguments("must not admit special characters","978-@-&<->_[]{}!-#")
         );
     }
 }
