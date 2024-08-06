@@ -7,15 +7,15 @@ import java.util.regex.Pattern;
  *
  * @author Alejandro Gómez Lucena.
  */
-public class Isbn {
+record Isbn (String isbnLiteral) {
     private static final Pattern PATTERN_FOR_CHECKING_INVALID_CHARACTERS = Pattern.compile(
             ".*[a-zA-Z!@#$%^&*()_+=\\[\\]{};':\"\\\\|,.<>\\/?].*"
     );
 
-    private final String isbnLiteral;
-
-    private Isbn(String id) {
-        this.isbnLiteral = id;
+    Isbn {
+        if (!isValidISBN(isbnLiteral)) {
+            throw new InvalidIsbn(isbnLiteral);
+        }
     }
 
     /**
@@ -39,14 +39,7 @@ public class Isbn {
      * @throws InvalidIsbn if the passed isbn is invalid
      */
     public static Isbn fromString(String isbn) {
-        if (!isValidISBN(isbn)) {
-            throw new InvalidIsbn(isbn);
-        }
         return new Isbn(isbn);
-    }
-
-    public String getValue() {
-        return isbnLiteral;
     }
 
     private static boolean hasValidChecksumDigit(String isbn) {
