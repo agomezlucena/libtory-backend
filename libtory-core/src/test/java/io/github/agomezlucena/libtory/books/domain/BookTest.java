@@ -9,6 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -79,6 +80,15 @@ class BookTest {
     ){
         var testSubject = Book.createBook(faker.code().isbn13(),faker.book().title());
         assertThrows(InvalidTitle.class,()->testSubject.setTitle(title));
+    }
+
+    @Test
+    @DisplayName("allow to create a book with authors and give access to them")
+    void shouldAllowToCreateABookWithAuthorsAndGiveAccessToThem(Faker faker){
+        final var givenAuthorsIds = new UUID[]{UUID.randomUUID(),UUID.randomUUID()};
+        final var expectedValue = Set.of(givenAuthorsIds);
+        final var testSubject = Book.createBook(faker.code().isbn13(), faker.book().title(),givenAuthorsIds);
+        assertEquals(expectedValue,testSubject.getAuthorsIds());
     }
 
     private static Stream<Arguments> emptyTitles(){
