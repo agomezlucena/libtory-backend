@@ -99,11 +99,15 @@ class BookTest {
         final var expectedValue = Set.of(givenAuthorId);
         final var mockedRepository = mock(BookRepository.class);
         final var mockedChecker = mock(AuthorChecker.class);
+
+        final var authorUpdateCommand = AuthorUpdateCommand.addAuthors(mockedChecker,mockedRepository,givenAuthorId);
+
+
         final var testSubject = Book.createBook(faker.code().isbn13(), faker.book().title());
 
         when(mockedChecker.authorsExists(givenAuthorId)).thenReturn(true);
 
-        testSubject.addAuthors(givenAuthorId).accept(mockedRepository,mockedChecker);
+        testSubject.updateAuthors(authorUpdateCommand);
 
         assertEquals(expectedValue,testSubject.getAuthorsIds());
         verify(mockedRepository).save(testSubject);
@@ -115,12 +119,51 @@ class BookTest {
         final var givenAuthorId = UUID.randomUUID();
         final var mockedRepository = mock(BookRepository.class);
         final var mockedChecker = mock(AuthorChecker.class);
+
+        final var authorUpdateCommand = AuthorUpdateCommand.addAuthors(mockedChecker,mockedRepository,givenAuthorId);
+
         final var testSubject = Book.createBook(faker.code().isbn13(), faker.book().title());
 
-        assertThrows(InvalidAuthor.class,()->
-                testSubject.addAuthors(givenAuthorId)
-                    .accept(mockedRepository,mockedChecker)
+        assertThrows(InvalidAuthor.class,()-> testSubject.updateAuthors(authorUpdateCommand));
+
+        verify(mockedRepository,times(0)).save(testSubject);
+    }
+
+    @Test
+    @DisplayName("remove an author if exists as author from the book")
+    void shouldRemoveAnAuthorIfExistsAsAuthorFromTheBook(Faker faker){
+        final var givenRemovedAuthorId = UUID.randomUUID();
+        final var mockedRepository = mock(BookRepository.class);
+        final var otherAuthorId = UUID.randomUUID();
+        final var authorsBeforeRemoval = Set.of(givenRemovedAuthorId,otherAuthorId);
+        final var authorAfterRemoval = Set.of(otherAuthorId);
+
+        final var authorUpdateCommand = AuthorUpdateCommand.deleteAuthors(mockedRepository,givenRemovedAuthorId);
+
+        final var testSubject = Book.createBook(
+                faker.code().isbn13(),
+                faker.book().title(),
+                givenRemovedAuthorId,
+                otherAuthorId
         );
+
+        assertEquals(authorsBeforeRemoval,testSubject.getAuthorsIds());
+
+        testSubject.updateAuthors(authorUpdateCommand);
+
+        assertEquals(authorAfterRemoval,testSubject.getAuthorsIds());
+        verify(mockedRepository).save(testSubject);
+    }
+
+    @Test
+    @DisplayName("not call to the repository if there is not changes after removal")
+    void shouldNotCallToTheRepositoryIfThereIsNotChangesAfterRemoval(Faker faker){
+        final var givenRemovedAuthorId = UUID.randomUUID();
+        final var mockedRepository = mock(BookRepository.class);
+        final var authorUpdateCommand = AuthorUpdateCommand.deleteAuthors(mockedRepository,givenRemovedAuthorId);
+        final var testSubject = Book.createBook(faker.code().isbn13(), faker.book().title());
+
+        testSubject.updateAuthors(authorUpdateCommand);
 
         verify(mockedRepository,times(0)).save(testSubject);
     }
