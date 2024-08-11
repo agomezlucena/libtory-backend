@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.*;
 
 @DisplayName("Book should")
 @ExtendWith(DataFakerExtension.class)
@@ -89,6 +90,39 @@ class BookTest {
         final var expectedValue = Set.of(givenAuthorsIds);
         final var testSubject = Book.createBook(faker.code().isbn13(), faker.book().title(),givenAuthorsIds);
         assertEquals(expectedValue,testSubject.getAuthorsIds());
+    }
+
+    @Test
+    @DisplayName("allow to add a new author and save the book if author exists")
+    void shouldAllowToAddANewAuthorAndSaveTheBookIfAuthorExists(Faker faker){
+        final var givenAuthorId = UUID.randomUUID();
+        final var expectedValue = Set.of(givenAuthorId);
+        final var mockedRepository = mock(BookRepository.class);
+        final var mockedChecker = mock(AuthorChecker.class);
+        final var testSubject = Book.createBook(faker.code().isbn13(), faker.book().title());
+
+        when(mockedChecker.authorsExists(givenAuthorId)).thenReturn(true);
+
+        testSubject.addAuthors(givenAuthorId).accept(mockedRepository,mockedChecker);
+
+        assertEquals(expectedValue,testSubject.getAuthorsIds());
+        verify(mockedRepository).save(testSubject);
+    }
+
+    @Test
+    @DisplayName("fail if the author is not registered")
+    void shouldFailIfTheAuthorIsNotRegistered(Faker faker){
+        final var givenAuthorId = UUID.randomUUID();
+        final var mockedRepository = mock(BookRepository.class);
+        final var mockedChecker = mock(AuthorChecker.class);
+        final var testSubject = Book.createBook(faker.code().isbn13(), faker.book().title());
+
+        assertThrows(InvalidAuthor.class,()->
+                testSubject.addAuthors(givenAuthorId)
+                    .accept(mockedRepository,mockedChecker)
+        );
+
+        verify(mockedRepository,times(0)).save(testSubject);
     }
 
     private static Stream<Arguments> emptyTitles(){
