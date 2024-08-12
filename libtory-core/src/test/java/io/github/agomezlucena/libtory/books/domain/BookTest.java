@@ -26,21 +26,21 @@ class BookTest {
     void shouldAllowToCreateABookWithValidIsbnAndGiveAccessToIt(Faker faker) {
         var givenIsbn = "978-0-596-52068-7";
 
-        var obtainedBook = Book.createBook(givenIsbn, faker.book().title());
+        var obtainedBook = Book.createBook(new BookPrimitives(givenIsbn, faker.book().title()));
 
         assertNotNull(obtainedBook);
-        assertEquals(givenIsbn,obtainedBook.getIsbn());
+        assertEquals(givenIsbn, obtainedBook.getIsbn());
     }
 
     @Test
     @DisplayName("allow to access to the title")
     void shouldAllowToAccessToTheTitle(Faker faker) {
         var givenTitle = faker.book().title();
-
-        var obtainedBook = Book.createBook(faker.code().isbn13(), givenTitle);
+        var givenPrimitive = new BookPrimitives(faker.code().isbn13(), givenTitle);
+        var obtainedBook = Book.createBook(givenPrimitive);
 
         assertNotNull(obtainedBook);
-        assertEquals(givenTitle,obtainedBook.getTitle());
+        assertEquals(givenTitle, obtainedBook.getTitle());
     }
 
     @Test
@@ -48,13 +48,13 @@ class BookTest {
     void shouldAllowToModifyTheTitle(Faker faker) {
         var originalTitle = faker.book().title();
         var secondTitle = faker.book().title();
-        var testSubject = Book.createBook(faker.code().isbn13(), originalTitle);
+        var testSubject = Book.createBook(new BookPrimitives(faker.code().isbn13(), originalTitle));
 
         testSubject.setTitle(secondTitle);
 
         var obtainedValue = testSubject.getTitle();
-        assertNotEquals(originalTitle,obtainedValue);
-        assertEquals(secondTitle,obtainedValue);
+        assertNotEquals(originalTitle, obtainedValue);
+        assertEquals(secondTitle, obtainedValue);
     }
 
     @ParameterizedTest(name = "a string is considered empty if: {0}")
@@ -64,115 +64,123 @@ class BookTest {
             @SuppressWarnings("unused") String emptyRule,
             String title,
             Faker faker
-    ){
+    ) {
         var givenIsbn = faker.code().isbn13();
         var expectedMessage = "given title is invalid";
-        var result = assertThrows(InvalidTitle.class,()->Book.createBook(givenIsbn,title)).getMessage();
-        assertEquals(expectedMessage,result);
+        var result = assertThrows(InvalidTitle.class, () -> Book.createBook(new BookPrimitives(givenIsbn, title)))
+                .getMessage();
+        assertEquals(expectedMessage, result);
     }
 
-    @ParameterizedTest(name= "a string is considered empty if: {0}")
+    @ParameterizedTest(name = "a string is considered empty if: {0}")
     @MethodSource("emptyTitles")
     @DisplayName("not allow to modify a book title with an empty one")
     void shouldNotAllowToModifyABookTitleWithAnEmptyOne(
             @SuppressWarnings("unused") String emptyRule,
             String title,
             Faker faker
-    ){
-        var testSubject = Book.createBook(faker.code().isbn13(),faker.book().title());
-        assertThrows(InvalidTitle.class,()->testSubject.setTitle(title));
+    ) {
+        var testSubject = Book.createBook(new BookPrimitives(faker.code().isbn13(), faker.book().title()));
+        assertThrows(InvalidTitle.class, () -> testSubject.setTitle(title));
     }
 
     @Test
     @DisplayName("allow to create a book with authors and give access to them")
-    void shouldAllowToCreateABookWithAuthorsAndGiveAccessToThem(Faker faker){
-        final var givenAuthorsIds = new UUID[]{UUID.randomUUID(),UUID.randomUUID()};
+    void shouldAllowToCreateABookWithAuthorsAndGiveAccessToThem(Faker faker) {
+        final var givenAuthorsIds = new UUID[]{UUID.randomUUID(), UUID.randomUUID()};
         final var expectedValue = Set.of(givenAuthorsIds);
-        final var testSubject = Book.createBook(faker.code().isbn13(), faker.book().title(),givenAuthorsIds);
-        assertEquals(expectedValue,testSubject.getAuthorsIds());
+        final var testSubject = Book.createBook(
+                new BookPrimitives(
+                        faker.code().isbn13(),
+                        faker.book().title(),
+                        Set.of(givenAuthorsIds)
+                )
+        );
+        assertEquals(expectedValue, testSubject.getAuthorsIds());
     }
 
     @Test
     @DisplayName("allow to add a new author and save the book if author exists")
-    void shouldAllowToAddANewAuthorAndSaveTheBookIfAuthorExists(Faker faker){
+    void shouldAllowToAddANewAuthorAndSaveTheBookIfAuthorExists(Faker faker) {
         final var givenAuthorId = UUID.randomUUID();
         final var expectedValue = Set.of(givenAuthorId);
         final var mockedRepository = mock(BookRepository.class);
         final var mockedChecker = mock(AuthorChecker.class);
 
-        final var authorUpdateCommand = AuthorUpdateCommand.addAuthors(mockedChecker,mockedRepository,givenAuthorId);
+        final var authorUpdateCommand = AuthorUpdateCommand.addAuthors(mockedChecker, mockedRepository, givenAuthorId);
 
 
-        final var testSubject = Book.createBook(faker.code().isbn13(), faker.book().title());
+        final var testSubject = Book.createBook(new BookPrimitives(faker.code().isbn13(), faker.book().title()));
 
         when(mockedChecker.authorsExists(givenAuthorId)).thenReturn(true);
 
         testSubject.updateAuthors(authorUpdateCommand);
 
-        assertEquals(expectedValue,testSubject.getAuthorsIds());
+        assertEquals(expectedValue, testSubject.getAuthorsIds());
         verify(mockedRepository).save(testSubject);
     }
 
     @Test
     @DisplayName("fail if the author is not registered")
-    void shouldFailIfTheAuthorIsNotRegistered(Faker faker){
+    void shouldFailIfTheAuthorIsNotRegistered(Faker faker) {
         final var givenAuthorId = UUID.randomUUID();
         final var mockedRepository = mock(BookRepository.class);
         final var mockedChecker = mock(AuthorChecker.class);
 
-        final var authorUpdateCommand = AuthorUpdateCommand.addAuthors(mockedChecker,mockedRepository,givenAuthorId);
+        final var authorUpdateCommand = AuthorUpdateCommand.addAuthors(mockedChecker, mockedRepository, givenAuthorId);
 
-        final var testSubject = Book.createBook(faker.code().isbn13(), faker.book().title());
+        final var testSubject = Book.createBook(new BookPrimitives(faker.code().isbn13(), faker.book().title()));
 
-        assertThrows(InvalidAuthor.class,()-> testSubject.updateAuthors(authorUpdateCommand));
+        assertThrows(InvalidAuthor.class, () -> testSubject.updateAuthors(authorUpdateCommand));
 
-        verify(mockedRepository,times(0)).save(testSubject);
+        verify(mockedRepository, times(0)).save(testSubject);
     }
 
     @Test
     @DisplayName("remove an author if exists as author from the book")
-    void shouldRemoveAnAuthorIfExistsAsAuthorFromTheBook(Faker faker){
+    void shouldRemoveAnAuthorIfExistsAsAuthorFromTheBook(Faker faker) {
         final var givenRemovedAuthorId = UUID.randomUUID();
         final var mockedRepository = mock(BookRepository.class);
         final var otherAuthorId = UUID.randomUUID();
-        final var authorsBeforeRemoval = Set.of(givenRemovedAuthorId,otherAuthorId);
+        final var authorsBeforeRemoval = Set.of(givenRemovedAuthorId, otherAuthorId);
         final var authorAfterRemoval = Set.of(otherAuthorId);
 
-        final var authorUpdateCommand = AuthorUpdateCommand.deleteAuthors(mockedRepository,givenRemovedAuthorId);
+        final var authorUpdateCommand = AuthorUpdateCommand.deleteAuthors(mockedRepository, givenRemovedAuthorId);
 
         final var testSubject = Book.createBook(
-                faker.code().isbn13(),
-                faker.book().title(),
-                givenRemovedAuthorId,
-                otherAuthorId
+                new BookPrimitives(
+                        faker.code().isbn13(),
+                        faker.book().title(),
+                        Set.of(givenRemovedAuthorId, otherAuthorId)
+                )
         );
 
-        assertEquals(authorsBeforeRemoval,testSubject.getAuthorsIds());
+        assertEquals(authorsBeforeRemoval, testSubject.getAuthorsIds());
 
         testSubject.updateAuthors(authorUpdateCommand);
 
-        assertEquals(authorAfterRemoval,testSubject.getAuthorsIds());
+        assertEquals(authorAfterRemoval, testSubject.getAuthorsIds());
         verify(mockedRepository).save(testSubject);
     }
 
     @Test
     @DisplayName("not call to the repository if there is not changes after removal")
-    void shouldNotCallToTheRepositoryIfThereIsNotChangesAfterRemoval(Faker faker){
+    void shouldNotCallToTheRepositoryIfThereIsNotChangesAfterRemoval(Faker faker) {
         final var givenRemovedAuthorId = UUID.randomUUID();
         final var mockedRepository = mock(BookRepository.class);
-        final var authorUpdateCommand = AuthorUpdateCommand.deleteAuthors(mockedRepository,givenRemovedAuthorId);
-        final var testSubject = Book.createBook(faker.code().isbn13(), faker.book().title());
+        final var authorUpdateCommand = AuthorUpdateCommand.deleteAuthors(mockedRepository, givenRemovedAuthorId);
+        final var testSubject = Book.createBook(new BookPrimitives(faker.code().isbn13(), faker.book().title()));
 
         testSubject.updateAuthors(authorUpdateCommand);
 
-        verify(mockedRepository,times(0)).save(testSubject);
+        verify(mockedRepository, times(0)).save(testSubject);
     }
 
-    private static Stream<Arguments> emptyTitles(){
+    private static Stream<Arguments> emptyTitles() {
         return Stream.of(
-                arguments("is null",null),
-                arguments("is empty",""),
-                arguments("contains only empty characters","                         ")
+                arguments("is null", null),
+                arguments("is empty", ""),
+                arguments("contains only empty characters", "                         ")
         );
     }
 }

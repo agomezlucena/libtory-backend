@@ -11,11 +11,11 @@ public class Book {
     private Title title;
     private AuthorsId authorsId;
 
-    public static Book createBook(String isbn, String title, UUID... authorsId) {
+    public static Book createBook(BookPrimitives primitives) {
         return new Book(
-                Isbn.fromString(isbn),
-                Title.fromText(title),
-                AuthorsId.from(authorsId)
+                Isbn.fromString(primitives.isbn()),
+                Title.fromText(primitives.title()),
+                AuthorsId.from(primitives.authors().toArray(new UUID[0]))
         );
     }
 
