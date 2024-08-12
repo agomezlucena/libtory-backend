@@ -2,6 +2,7 @@ package io.github.agomezlucena.libtory.books.domain;
 
 import io.github.agomezlucena.libtory.shared.DataFakerExtension;
 import net.datafaker.Faker;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,13 +21,20 @@ import static org.mockito.Mockito.*;
 @DisplayName("Book should")
 @ExtendWith(DataFakerExtension.class)
 class BookTest {
+    private final AuthorChecker mockAuthorChecker = mock(AuthorChecker.class);
+
+    @BeforeEach
+    void setUpDefaultMocks(){
+        reset(mockAuthorChecker);
+        when(mockAuthorChecker.authorsExists(notNull(UUID[].class))).thenReturn(true);
+    }
 
     @Test
     @DisplayName("allow to create a book with an valid isbn and give access to it")
     void shouldAllowToCreateABookWithValidIsbnAndGiveAccessToIt(Faker faker) {
         var givenIsbn = "978-0-596-52068-7";
-
-        var obtainedBook = Book.createBook(new BookPrimitives(givenIsbn, faker.book().title()));
+        var primitives = new BookPrimitives(givenIsbn, faker.book().title());
+        var obtainedBook = Book.createBook(primitives,this.mockAuthorChecker);
 
         assertNotNull(obtainedBook);
         assertEquals(givenIsbn, obtainedBook.getIsbn());
@@ -37,7 +45,7 @@ class BookTest {
     void shouldAllowToAccessToTheTitle(Faker faker) {
         var givenTitle = faker.book().title();
         var givenPrimitive = new BookPrimitives(faker.code().isbn13(), givenTitle);
-        var obtainedBook = Book.createBook(givenPrimitive);
+        var obtainedBook = Book.createBook(givenPrimitive,this.mockAuthorChecker);
 
         assertNotNull(obtainedBook);
         assertEquals(givenTitle, obtainedBook.getTitle());
@@ -48,7 +56,8 @@ class BookTest {
     void shouldAllowToModifyTheTitle(Faker faker) {
         var originalTitle = faker.book().title();
         var secondTitle = faker.book().title();
-        var testSubject = Book.createBook(new BookPrimitives(faker.code().isbn13(), originalTitle));
+        var primitives = new BookPrimitives(faker.code().isbn13(), originalTitle);
+        var testSubject = Book.createBook(primitives,this.mockAuthorChecker);
 
         testSubject.setTitle(secondTitle);
 
@@ -67,8 +76,12 @@ class BookTest {
     ) {
         var givenIsbn = faker.code().isbn13();
         var expectedMessage = "given title is invalid";
-        var result = assertThrows(InvalidTitle.class, () -> Book.createBook(new BookPrimitives(givenIsbn, title)))
-                .getMessage();
+        var givenPrimitives = new BookPrimitives(givenIsbn, title);
+        var result = assertThrows(
+                InvalidTitle.class,
+                () -> Book.createBook(givenPrimitives,this.mockAuthorChecker)
+        ).getMessage();
+
         assertEquals(expectedMessage, result);
     }
 
@@ -80,7 +93,8 @@ class BookTest {
             String title,
             Faker faker
     ) {
-        var testSubject = Book.createBook(new BookPrimitives(faker.code().isbn13(), faker.book().title()));
+        var primitives = new BookPrimitives(faker.code().isbn13(), faker.book().title());
+        var testSubject = Book.createBook(primitives,this.mockAuthorChecker);
         assertThrows(InvalidTitle.class, () -> testSubject.setTitle(title));
     }
 
@@ -89,14 +103,47 @@ class BookTest {
     void shouldAllowToCreateABookWithAuthorsAndGiveAccessToThem(Faker faker) {
         final var givenAuthorsIds = new UUID[]{UUID.randomUUID(), UUID.randomUUID()};
         final var expectedValue = Set.of(givenAuthorsIds);
-        final var testSubject = Book.createBook(
-                new BookPrimitives(
-                        faker.code().isbn13(),
-                        faker.book().title(),
-                        Set.of(givenAuthorsIds)
-                )
+        final var primitives = new BookPrimitives(
+                faker.code().isbn13(),
+                faker.book().title(),
+                Set.of(givenAuthorsIds)
         );
+
+        final var testSubject = Book.createBook(primitives,this.mockAuthorChecker);
         assertEquals(expectedValue, testSubject.getAuthorsIds());
+    }
+
+    @Test
+    @DisplayName("not allow to create a book with authors if any of the given authors don't exists")
+    void shouldNotAllowToCreateABookWithAuthorsIfAnyOfTheGivenAuthorsDoesNotExists(Faker faker){
+        final var mockedChecker = mock(AuthorChecker.class);
+        final var givenPrimitives = new BookPrimitives(
+                faker.code().isbn13(),
+                faker.book().title(),
+                UUID.randomUUID()
+        );
+
+        when(mockedChecker.authorsExists(any())).thenReturn(false);
+
+        assertThrows(InvalidAuthor.class,()->Book.createBook(givenPrimitives,mockedChecker));
+
+        verify(mockedChecker).authorsExists(any());
+    }
+
+    @Test
+    @DisplayName("not call to the checker if dont have any author")
+    void shouldNotCallToTheCheckerIfDontHaveAnyAuthor(Faker faker){
+        final var mockedChecker = mock(AuthorChecker.class);
+        final var givenPrimitives = new BookPrimitives(
+                faker.code().isbn13(),
+                faker.book().title()
+        );
+
+        when(mockedChecker.authorsExists(any())).thenReturn(true);
+
+        Book.createBook(givenPrimitives,mockedChecker);
+
+        verify(mockAuthorChecker,times(0)).authorsExists(any());
     }
 
     @Test
@@ -108,9 +155,9 @@ class BookTest {
         final var mockedChecker = mock(AuthorChecker.class);
 
         final var authorUpdateCommand = AuthorUpdateCommand.addAuthors(mockedChecker, mockedRepository, givenAuthorId);
+        final var primitives = new BookPrimitives(faker.code().isbn13(), faker.book().title());
 
-
-        final var testSubject = Book.createBook(new BookPrimitives(faker.code().isbn13(), faker.book().title()));
+        final var testSubject = Book.createBook(primitives,this.mockAuthorChecker);
 
         when(mockedChecker.authorsExists(givenAuthorId)).thenReturn(true);
 
@@ -128,8 +175,9 @@ class BookTest {
         final var mockedChecker = mock(AuthorChecker.class);
 
         final var authorUpdateCommand = AuthorUpdateCommand.addAuthors(mockedChecker, mockedRepository, givenAuthorId);
+        final var primitives = new BookPrimitives(faker.code().isbn13(), faker.book().title());
 
-        final var testSubject = Book.createBook(new BookPrimitives(faker.code().isbn13(), faker.book().title()));
+        final var testSubject = Book.createBook(primitives,this.mockAuthorChecker);
 
         assertThrows(InvalidAuthor.class, () -> testSubject.updateAuthors(authorUpdateCommand));
 
@@ -146,14 +194,13 @@ class BookTest {
         final var authorAfterRemoval = Set.of(otherAuthorId);
 
         final var authorUpdateCommand = AuthorUpdateCommand.deleteAuthors(mockedRepository, givenRemovedAuthorId);
-
-        final var testSubject = Book.createBook(
-                new BookPrimitives(
-                        faker.code().isbn13(),
-                        faker.book().title(),
-                        Set.of(givenRemovedAuthorId, otherAuthorId)
-                )
+        final var primitives = new BookPrimitives(
+                faker.code().isbn13(),
+                faker.book().title(),
+                Set.of(givenRemovedAuthorId, otherAuthorId)
         );
+
+        final var testSubject = Book.createBook(primitives, this.mockAuthorChecker);
 
         assertEquals(authorsBeforeRemoval, testSubject.getAuthorsIds());
 
@@ -169,7 +216,8 @@ class BookTest {
         final var givenRemovedAuthorId = UUID.randomUUID();
         final var mockedRepository = mock(BookRepository.class);
         final var authorUpdateCommand = AuthorUpdateCommand.deleteAuthors(mockedRepository, givenRemovedAuthorId);
-        final var testSubject = Book.createBook(new BookPrimitives(faker.code().isbn13(), faker.book().title()));
+        final var primitives = new BookPrimitives(faker.code().isbn13(), faker.book().title());
+        final var testSubject = Book.createBook(primitives,this.mockAuthorChecker);
 
         testSubject.updateAuthors(authorUpdateCommand);
 
