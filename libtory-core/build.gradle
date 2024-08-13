@@ -8,10 +8,16 @@ repositories {
     mavenCentral()
 }
 
+test {
+    useJUnitPlatform()
+}
+
 dependencies {
+    implementation "org.jspecify:jspecify:${jspecifyVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-core:${mockitoVersion}"
     testImplementation "net.datafaker:datafaker:${datafakerVersion}"
     testFixturesApi "net.datafaker:datafaker:${datafakerVersion}"
     testFixturesApi "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
