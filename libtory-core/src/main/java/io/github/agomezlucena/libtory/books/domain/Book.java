@@ -1,5 +1,7 @@
 package io.github.agomezlucena.libtory.books.domain;
 
+import org.jspecify.annotations.NonNull;
+
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,7 +28,7 @@ public class Book {
      * @throws InvalidTitle if the passed title is null or blank.
      * @throws InvalidAuthor if any of the passed authors is not registered in our systems.
      */
-    public static Book createBook(BookPrimitives primitives, AuthorChecker checker) {
+    public static Book createBook(@NonNull BookPrimitives primitives, @NonNull AuthorChecker checker) {
         final var authorIds = primitives.authorsAsArray();
 
         if(authorIds.length > 0 && !checker.authorsExists(authorIds)) throw new InvalidAuthor();
@@ -44,19 +46,28 @@ public class Book {
         this.authorsId = authorsId;
     }
 
-    public String getIsbn() {
+    public @NonNull String getIsbn() {
         return isbn.isbnLiteral();
     }
 
-    public String getTitle() {
+    public @NonNull String getTitle() {
         return title.title();
     }
 
-    public void setTitle(String title) {
+    /**
+     * Will set the title with the value passed by parameter.
+     * @param title a non null or not blank string
+     * @throws InvalidTitle when title is null or blank
+     */
+    public void setTitle(@NonNull String title) {
         this.title = Title.fromText(title);
     }
 
-    public Set<UUID> getAuthorsIds() {
+    /**
+     * will return the authors ids of the book.
+     * @return a set with the author id, in case that don't have any will return an empty set.
+     */
+    public @NonNull Set<UUID> getAuthorsIds() {
         return authorsId.ids();
     }
 
@@ -65,7 +76,7 @@ public class Book {
      * @param command and adding author command or deleting author command.
      * @throws InvalidAuthor if you try to add a not registered author in our systems.
      */
-    public void updateAuthors(AuthorUpdateCommand command) {
+    public void updateAuthors(@NonNull AuthorUpdateCommand command) {
         switch (command) {
             case AddAuthors(var checker, var repo, var ids) -> addAuthors(repo, checker, ids);
             case DeleteAuthor(var repo, var ids) -> deleteAuthors(repo,ids);
