@@ -10,6 +10,7 @@ repositories {
 
 test {
     useJUnitPlatform()
+    forkEvery 2
 }
 
 dependencies {
