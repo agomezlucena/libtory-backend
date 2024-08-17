@@ -1,6 +1,5 @@
-plugins {
-    id 'java'
-}
+apply plugin : 'java'
+apply plugin:  'java-test-fixtures'
 
 group = 'io.github.agomezlucena'
 version = '1.0-SNAPSHOT'
@@ -10,8 +9,10 @@ repositories {
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testFixturesApi "net.datafaker:datafaker:${datafakerVersion}"
+    testFixturesApi "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
 }
 
 test {

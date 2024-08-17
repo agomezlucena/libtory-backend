@@ -1,5 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'java-test-fixtures'
 apply plugin: 'org.springframework.boot'
 
 group = 'io.github.agomezlucena'
@@ -17,10 +16,15 @@ test {
 dependencies {
     implementation "org.jspecify:jspecify:${jspecifyVersion}"
     implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    implementation "org.springframework.boot:spring-boot-starter"
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-core:${mockitoVersion}"
-    testImplementation "net.datafaker:datafaker:${datafakerVersion}"
-    testFixturesApi "net.datafaker:datafaker:${datafakerVersion}"
-    testFixturesApi "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation testFixtures(project(":shared"))
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:postgresql'
+    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'org.springframework.boot:spring-boot-docker-compose'
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
