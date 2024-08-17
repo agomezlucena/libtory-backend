@@ -1,2 +1,4 @@
 rootProject.name = 'libtory-backend'
 include 'libtory-books'
+include 'shared'
+
