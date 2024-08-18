@@ -17,11 +17,12 @@ dependencies {
     implementation "org.jspecify:jspecify:${jspecifyVersion}"
     implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
     implementation "org.springframework.boot:spring-boot-starter"
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
-    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-jdbc"
+    implementation 'org.liquibase:liquibase-core'
+
     testImplementation testFixtures(project(":shared"))
     testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:postgresql'
     runtimeOnly 'org.postgresql:postgresql'
