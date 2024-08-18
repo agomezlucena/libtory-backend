@@ -1,0 +1,73 @@
+databaseChangeLog:
+  - changeSet:
+      id: books-db-0001
+      author: Alejandro Gómez Lucena
+      changes:
+        - sql:
+            sql: create schema if not exists books;
+  - changeSet:
+      id: books-db-0002
+      author: Alejandro Gómez Lucena
+      comment: define the base schema for books bounded context
+      changes:
+        - createTable:
+            tableName: books
+            schemaName: books
+            columns:
+              - column:
+                  name: isbn
+                  type: varchar(13)
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_books
+              - column:
+                  name: title
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: authors
+            schemaName: books
+            columns:
+              - column:
+                  name: author_id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_authors
+              - column:
+                  name: author_name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: book_authors
+            schemaName: books
+            columns:
+              - column:
+                  name: book_isbn
+                  type: varchar(13)
+              - column:
+                  name: author_id
+                  type: uuid
+        - addPrimaryKey:
+            tableName: book_authors
+            schemaName: book
+            columnNames: book_isbn,author_id
+            constraintName: book_authors_pk
+        - addForeignKeyConstraint:
+            constraintName: book_authors_fk_to_books
+            baseTableSchemaName: books
+            baseTableName: book_authors
+            baseColumnNames: book_isbn
+            referencedTableSchemaName: books
+            referencedTableName: books
+            referencedColumnNames: isbn
+        - addForeignKeyConstraint:
+            constraintName: book_authors_fk_to_authors
+            baseTableSchemaName: books
+            baseTableName: book_authors
+            baseColumnNames: author_id
+            referencedTableSchemaName: books
+            referencedTableName: authors
+            referencedColumnNames: author_id
