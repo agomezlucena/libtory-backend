@@ -43,3 +43,4 @@ bin/
 
 .idea/**/**
 .idea/gradle.xml
+/docker/env/
