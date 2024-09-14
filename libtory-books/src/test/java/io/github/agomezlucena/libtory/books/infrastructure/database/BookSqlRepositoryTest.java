@@ -96,6 +96,31 @@ class BookSqlRepositoryTest {
         verify(jdbcOperations).batchUpdate(eq(relateQuery),notNull(SqlParameterSource[].class));
     }
 
+    @Test
+    @DisplayName("remove the given book")
+    void shouldRemoveGivenBook(@FakerIsbn String isbn){
+        var givenBook = createBookWithIsbnAndAuthors(isbn);
+        var captor = ArgumentCaptor.forClass(SqlParameterSource.class);
+        var deleteBookRelationshipWithAuthorsQuery = queries.getQuery(BookQueryName.DELETE_BOOK_RELATIONSHIP_WITH_AUTHORS);
+        var deleteBookQuery = queries.getQuery(BookQueryName.DELETE_BOOK);
+
+        when(jdbcOperations.update(eq(deleteBookRelationshipWithAuthorsQuery),captor.capture())).thenReturn(1);
+        when(jdbcOperations.update(eq(deleteBookQuery),captor.capture())).thenReturn(1);
+
+        repository.delete(givenBook);
+
+        verify(jdbcOperations,times(2)).update(anyString(),notNull(SqlParameterSource.class));
+        var givenParameters = captor.getAllValues();
+        assertNotNull(givenParameters);
+        assertEquals(2,givenParameters.size());
+
+        var firstQueryParam = givenParameters.getFirst();
+        var secondQueryParam = givenParameters.get(1);
+
+        assertEquals(givenBook.getIsbn(),firstQueryParam.getValue("book_isbn"));
+        assertEquals(givenBook.getIsbn(),secondQueryParam.getValue("book_isbn"));
+    }
+
     private Book createBookWithIsbnAndAuthors(String isbn, UUID...authors){
         var mockedAuthorChecker = mock(AuthorChecker.class);
         when(mockedAuthorChecker.authorsExists(any())).thenReturn(true);

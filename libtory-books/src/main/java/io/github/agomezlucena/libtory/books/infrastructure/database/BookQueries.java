@@ -28,6 +28,8 @@ public class BookQueries {
         SAVE_BOOK_INFORMATION("save-book-information"),
         SAVE_AUTHOR_INFORMATION("save-author-information"),
         RELATE_BOOK_WITH_AUTHOR("relate-book-with-author"),
+        DELETE_BOOK("delete-book"),
+        DELETE_BOOK_RELATIONSHIP_WITH_AUTHORS("delete-book-relationship-with-authors"),
         DERELATE_BOOK_WITH_NOT_GIVEN_AUTHORS("derelate-book-with-not-given-authors");
 
         final String queryName;

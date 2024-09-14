@@ -9,6 +9,9 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import static io.github.agomezlucena.libtory.books.infrastructure.database.BookQueries.BookQueryName.DELETE_BOOK;
+import static io.github.agomezlucena.libtory.books.infrastructure.database.BookQueries.BookQueryName.DELETE_BOOK_RELATIONSHIP_WITH_AUTHORS;
+
 @Repository
 public class BookSqlRepository implements BookRepository {
     private static final String BOOK_ISBN_QUERY_PARAM = "book_isbn";
@@ -25,6 +28,16 @@ public class BookSqlRepository implements BookRepository {
     ) {
         this.bookQueries = bookQueries;
         this.namedParameterJdbcOperations = namedParameterJdbcOperations;
+    }
+
+    @Override
+    @Transactional
+    public void delete(Book book) {
+        var deleteRelationshipQuery = bookQueries.getQuery(DELETE_BOOK_RELATIONSHIP_WITH_AUTHORS);
+        var deleteBook = bookQueries.getQuery(DELETE_BOOK);
+        var params = new MapSqlParameterSource(BOOK_ISBN_QUERY_PARAM, book.getIsbn());
+        namedParameterJdbcOperations.update(deleteRelationshipQuery, params);
+        namedParameterJdbcOperations.update(deleteBook, params);
     }
 
     @Override
