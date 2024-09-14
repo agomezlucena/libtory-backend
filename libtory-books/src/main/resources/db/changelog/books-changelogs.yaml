@@ -53,7 +53,7 @@ databaseChangeLog:
                   type: uuid
         - addPrimaryKey:
             tableName: book_authors
-            schemaName: book
+            schemaName: books
             columnNames: book_isbn,author_id
             constraintName: pk_book_authors
         - addForeignKeyConstraint:
