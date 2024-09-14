@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static io.github.agomezlucena.libtory.books.infrastructure.database.BookQueries.BookQueryName;
 
 @DisplayName("Book queries should")
 class BookQueriesTest {
@@ -30,21 +31,21 @@ class BookQueriesTest {
     @ParameterizedTest
     @DisplayName("should return a not null string for every given key")
     @EnumSource(BookQueries.BookQueryName.class)
-    void shouldReturnANotNullStringForEveryGivenKey(final BookQueries.BookQueryName queryName) {
+    void shouldReturnANotNullStringForEveryGivenKey(final BookQueryName queryName) {
         assertNotNull(bookQueries.getQuery(queryName));
     }
 
     @ParameterizedTest
     @DisplayName("should return a not blank string for every given key")
     @EnumSource(BookQueries.BookQueryName.class)
-    void shouldReturnANotNullStringForEveryGivenKeyWithBlank(final BookQueries.BookQueryName queryName) {
+    void shouldReturnANotNullStringForEveryGivenKeyWithBlank(final BookQueryName queryName) {
         assertFalse(bookQueries.getQuery(queryName).isBlank(),"query for name: "+queryName+" is blank");
     }
 
     @ParameterizedTest
     @DisplayName("should return the query from book-sql/queries.xml for the passed query name")
     @EnumSource(BookQueries.BookQueryName.class)
-    void shouldReturnTheQueryFromBookSqlQueryName(final BookQueries.BookQueryName queryName) {
+    void shouldReturnTheQueryFromBookSqlQueryName(final BookQueryName queryName) {
         var expectedValue = externalizedProperties.getProperty(queryName.queryName);
         assertEquals(expectedValue,bookQueries.getQuery(queryName));
     }

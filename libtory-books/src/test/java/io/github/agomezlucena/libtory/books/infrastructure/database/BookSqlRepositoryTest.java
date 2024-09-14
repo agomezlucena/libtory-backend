@@ -3,7 +3,6 @@ package io.github.agomezlucena.libtory.books.infrastructure.database;
 import io.github.agomezlucena.libtory.books.domain.AuthorChecker;
 import io.github.agomezlucena.libtory.books.domain.Book;
 import io.github.agomezlucena.libtory.books.domain.BookPrimitives;
-import io.github.agomezlucena.libtory.books.infrastructure.database.BookQueries.BookQueryName;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension.FakerIsbn;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static io.github.agomezlucena.libtory.books.infrastructure.database.BookQueries.BookQueryName;
+
 
 @ExtendWith(DataFakerExtension.class)
 @DisplayName("a book sql repository should")
@@ -87,7 +88,7 @@ class BookSqlRepositoryTest {
         assertNotNull(batchUpdateQueriesArguments);
         assertEquals(1, batchUpdateQueriesArguments.size());
 
-        var batchUpdateParameters = batchUpdateQueriesArguments.get(0);
+        var batchUpdateParameters = batchUpdateQueriesArguments.getFirst();
         assertEquals(1,batchUpdateParameters.length);
         assertEquals(givenBook.getIsbn(),batchUpdateParameters[0].getValue("book_isbn"));
         assertEquals(givenAuthorId,batchUpdateParameters[0].getValue("author_id"));
