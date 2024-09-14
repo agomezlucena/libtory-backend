@@ -1,0 +1,28 @@
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+
+group = 'io.github.agomezlucena'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    implementation "org.springframework.boot:spring-boot-starter"
+    implementation 'org.liquibase:liquibase-core'
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    implementation project(":libtory-books")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+bootJar {
+    enabled=true
+}

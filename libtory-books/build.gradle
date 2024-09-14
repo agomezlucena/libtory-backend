@@ -7,7 +7,9 @@ version = '1.0-SNAPSHOT'
 repositories {
     mavenCentral()
 }
-
+bootJar{
+    enabled=false
+}
 test {
     useJUnitPlatform()
     forkEvery 2
@@ -20,7 +22,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-jdbc"
     implementation 'org.liquibase:liquibase-core'
 
-    testImplementation testFixtures(project(":shared"))
+    testImplementation testFixtures(project(":libtory-shared"))
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'

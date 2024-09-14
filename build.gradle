@@ -17,3 +17,7 @@ ext {
     jspecifyVersion = "1.0.+"
     springBootVersion = "3.3.2"
 }
+
+bootJar{
+    enabled=false
+}
