@@ -2,13 +2,14 @@ databaseChangeLog:
   - changeSet:
       id: books-db-0001
       author: Alejandro Gómez Lucena
+      comment: define the base schema for books bounded context
       changes:
         - sql:
             sql: create schema if not exists books;
   - changeSet:
       id: books-db-0002
       author: Alejandro Gómez Lucena
-      comment: define the base schema for books bounded context
+      comment: define the tables for books bounded context
       changes:
         - createTable:
             tableName: books
@@ -54,7 +55,7 @@ databaseChangeLog:
             tableName: book_authors
             schemaName: book
             columnNames: book_isbn,author_id
-            constraintName: book_authors_pk
+            constraintName: pk_book_authors
         - addForeignKeyConstraint:
             constraintName: book_authors_fk_to_books
             baseTableSchemaName: books
