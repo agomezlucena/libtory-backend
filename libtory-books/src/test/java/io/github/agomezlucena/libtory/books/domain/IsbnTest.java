@@ -22,7 +22,7 @@ class IsbnTest {
     ) {
         Isbn obtainedValue = Isbn.fromString(givenIsbnLiteral);
         assertNotNull(obtainedValue);
-        assertEquals(givenIsbnLiteral, obtainedValue.isbnLiteral());
+        assertEquals(givenIsbnLiteral.replace("-",""), obtainedValue.isbnLiteral());
     }
 
     @ParameterizedTest(name = "rule: {0}")

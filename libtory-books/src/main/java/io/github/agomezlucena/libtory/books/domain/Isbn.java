@@ -12,10 +12,11 @@ record Isbn (String isbnLiteral) {
             ".*[a-zA-Z!@#$%^&*()_+=\\[\\]{};':\"\\\\|,.<>\\/?].*"
     );
 
-    Isbn {
+    Isbn (String isbnLiteral) {
         if (!isValidISBN(isbnLiteral)) {
             throw new InvalidIsbn(isbnLiteral);
         }
+        this.isbnLiteral = isbnLiteral.replace("-","");
     }
 
     /**

@@ -71,6 +71,10 @@ public class Book {
         return authorsId.ids();
     }
 
+    public boolean hasAuthors(){
+        return !authorsId.isEmpty();
+    }
+
     /**
      * update authors adding or deleting the given authors based in the command past by parameter.
      * @param command and adding author command or deleting author command.

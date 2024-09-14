@@ -16,7 +16,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @DisplayName("Book should")
@@ -38,7 +37,7 @@ class BookTest {
         var obtainedBook = Book.createBook(primitives,this.defaultAuthorChecker);
 
         assertNotNull(obtainedBook);
-        assertEquals(givenIsbn, obtainedBook.getIsbn());
+        assertEquals(givenIsbn.replace("-",""), obtainedBook.getIsbn());
     }
 
     @Test

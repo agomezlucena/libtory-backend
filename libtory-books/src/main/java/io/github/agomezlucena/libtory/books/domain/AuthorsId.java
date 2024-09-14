@@ -69,4 +69,8 @@ record AuthorsId(Set<UUID> ids) {
                         .collect(Collectors.toSet())
         );
     }
+
+    public boolean isEmpty(){
+        return ids.isEmpty();
+    }
 }
