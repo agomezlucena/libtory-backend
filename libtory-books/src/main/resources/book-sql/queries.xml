@@ -43,4 +43,10 @@
         where book_isbn = :book_isbn and
             author_id not in (:author_id)
     </entry>
+    <entry key="delete-book">
+        delete from books where isbn = :book_isbn
+    </entry>
+    <entry key="delete-book-relationship-with-authors">
+        delete from book_authors where book_isbn = :book_isbn
+    </entry>
 </properties>
