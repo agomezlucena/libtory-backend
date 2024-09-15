@@ -56,6 +56,9 @@ class BookTest {
     void shouldAllowToModifyTheTitle(Faker faker) {
         var originalTitle = faker.book().title();
         var secondTitle = faker.book().title();
+        while (originalTitle.equals(secondTitle)){
+            secondTitle = faker.book().title();
+        }
         var primitives = new BookPrimitives(faker.code().isbn13(), originalTitle);
         var testSubject = Book.createBook(primitives,this.defaultAuthorChecker);
 
