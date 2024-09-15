@@ -33,14 +33,10 @@ public class Book {
 
         if(authorIds.length > 0 && !checker.authorsExists(authorIds)) throw new InvalidAuthor();
 
-        return new Book(
-                Isbn.fromString(primitives.isbn()),
-                Title.fromText(primitives.title()),
-                AuthorsId.from(authorIds)
-        );
+        return primitives.toBook();
     }
 
-    private Book(Isbn isbn, Title title, AuthorsId authorsId) {
+    Book(Isbn isbn, Title title, AuthorsId authorsId) {
         this.isbn = isbn;
         this.title = title;
         this.authorsId = authorsId;
