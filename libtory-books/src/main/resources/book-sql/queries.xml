@@ -7,10 +7,10 @@
         where author_id in (:expectedAuthors)
     </entry>
     <entry key="get-book-information">
-        select b.isbn, b.title, a.author_id
+        select b.isbn as book_isbn, b.title as book_title, ba.author_id
         from
             books b left join
-            book_authors ba on b.isbn
+            book_authors ba on b.isbn = ba.book_isbn
         where
             b.isbn = :book_isbn
         for update

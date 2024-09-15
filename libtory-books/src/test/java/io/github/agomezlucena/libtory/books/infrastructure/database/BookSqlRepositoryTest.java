@@ -3,6 +3,7 @@ package io.github.agomezlucena.libtory.books.infrastructure.database;
 import io.github.agomezlucena.libtory.books.domain.AuthorChecker;
 import io.github.agomezlucena.libtory.books.domain.Book;
 import io.github.agomezlucena.libtory.books.domain.BookPrimitives;
+import io.github.agomezlucena.libtory.books.domain.Isbn;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension.FakerIsbn;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,10 +11,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -72,7 +76,8 @@ class BookSqlRepositoryTest {
         var batchUpdateQueryArgumentCaptor = ArgumentCaptor.forClass(SqlParameterSource[].class);
         when(jdbcOperations.update(eq(bookQuery),updateQueryArgumentCaptor.capture())).thenReturn(1);
         when(jdbcOperations.update(eq(derelateQuery),updateQueryArgumentCaptor.capture())).thenReturn(0);
-        when(jdbcOperations.batchUpdate(eq(relateQuery),batchUpdateQueryArgumentCaptor.capture())).thenReturn(new int[]{1});
+        when(jdbcOperations.batchUpdate(eq(relateQuery),batchUpdateQueryArgumentCaptor.capture()))
+                .thenReturn(new int[]{1});
 
         repository.save(givenBook);
 
@@ -120,6 +125,27 @@ class BookSqlRepositoryTest {
 
         assertEquals(givenBook.getIsbn(),firstQueryParam.getValue("book_isbn"));
         assertEquals(givenBook.getIsbn(),secondQueryParam.getValue("book_isbn"));
+    }
+
+    @Test
+    @DisplayName("call to the valid query when you are looking and locking for a book by isbn")
+    void shouldCallToTheValidQueryWhenYouAreLookingAndLockingForABookByIsbn(@FakerIsbn String givenIsbn){
+        var expectedQuery = queries.getQuery(BookQueryName.GET_BOOK_INFORMATION);
+        var expectedOutput = Optional.of(createBookWithIsbnAndAuthors(givenIsbn));
+        var givenCaptor = ArgumentCaptor.forClass(SqlParameterSource.class);
+
+        when(jdbcOperations.query(
+                eq(expectedQuery),
+                givenCaptor.capture(),
+                (ResultSetExtractor<Optional<Book>>) notNull( ))
+        ).thenReturn(expectedOutput);
+
+        var result = repository.findByIsbnLocking(Isbn.fromString(givenIsbn));
+        assertNotNull(result);
+        assertEquals(expectedOutput,result);
+        var params = givenCaptor.getValue();
+        assertNotNull(params);
+        assertEquals(givenIsbn,params.getValue("book_isbn"));
     }
 
     private Book createBookWithIsbnAndAuthors(String isbn, UUID...authors){
