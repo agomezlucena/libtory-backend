@@ -23,7 +23,8 @@ public class DataFakerExtension implements ParameterResolver {
     ) throws ParameterResolutionException {
         var parameter = parameterContext.getParameter();
         return  parameter.getType().equals(Faker.class) ||
-                parameter.isAnnotationPresent(FakerIsbn.class);
+                parameter.isAnnotationPresent(FakerIsbn.class) ||
+                parameter.isAnnotationPresent(FakerBookTitle.class);
     }
 
     @Override
@@ -35,6 +36,10 @@ public class DataFakerExtension implements ParameterResolver {
         if(parameter.isAnnotationPresent(FakerIsbn.class)) {
             return isbn(parameter.getAnnotation(FakerIsbn.class));
         }
+        if(parameter.isAnnotationPresent(FakerBookTitle.class)) {
+            return faker.book().title();
+        }
+
         return faker;
     }
 
@@ -54,5 +59,10 @@ public class DataFakerExtension implements ParameterResolver {
         }
         IsbnType value() default ISBN_13;
         boolean withHyphens() default false;
+    }
+    @Target(ElementType.PARAMETER)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface FakerBookTitle{
+
     }
 }
