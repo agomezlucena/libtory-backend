@@ -1,22 +1,39 @@
 package io.github.agomezlucena.libtory.books.domain;
 
 import java.util.regex.Pattern;
+import java.util.Objects;
 
 /**
  * An ISBN is a string of digits or digits and hyphens than identifies a book.
  *
  * @author Alejandro Gómez Lucena.
  */
-record Isbn (String isbnLiteral) {
+public class Isbn {
+    private final String isbnLiteral;
     private static final Pattern PATTERN_FOR_CHECKING_INVALID_CHARACTERS = Pattern.compile(
             ".*[a-zA-Z!@#$%^&*()_+=\\[\\]{};':\"\\\\|,.<>\\/?].*"
     );
 
-    Isbn (String isbnLiteral) {
+    private Isbn (String isbnLiteral) {
         if (!isValidISBN(isbnLiteral)) {
             throw new InvalidIsbn(isbnLiteral);
         }
         this.isbnLiteral = isbnLiteral.replace("-","");
+    }
+
+    public String isbnLiteral(){
+        return isbnLiteral;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof Isbn other)) return false;
+        return Objects.equals(isbnLiteral, other.isbnLiteral);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(isbnLiteral);
     }
 
     /**
