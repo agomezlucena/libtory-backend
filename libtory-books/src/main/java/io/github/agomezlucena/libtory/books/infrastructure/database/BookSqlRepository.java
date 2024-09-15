@@ -23,20 +23,21 @@ public class BookSqlRepository implements BookRepository {
     private static final String AUTHOR_ID_QUERY_PARAMS = "author_id";
 
     private final BookQueries bookQueries;
-    private final NamedParameterJdbcOperations namedParameterJdbcOperations;
+    private final NamedParameterJdbcOperations jdbcOperations;
 
     public BookSqlRepository(
             final BookQueries bookQueries,
-            @Qualifier("booksNamedParameterOperations") final NamedParameterJdbcOperations namedParameterJdbcOperations
+            @Qualifier("booksNamedParameterOperations")
+            final NamedParameterJdbcOperations jdbcOperations
     ) {
         this.bookQueries = bookQueries;
-        this.namedParameterJdbcOperations = namedParameterJdbcOperations;
+        this.jdbcOperations = jdbcOperations;
     }
 
     @Override
     @Transactional
     public Optional<Book> findByIsbnLocking(Isbn isbn) {
-        return namedParameterJdbcOperations.query(
+        return jdbcOperations.query(
                 bookQueries.getQuery(BookQueryName.GET_BOOK_INFORMATION),
                 new MapSqlParameterSource(BOOK_ISBN_QUERY_PARAM, isbn.isbnLiteral()),
                 extractBook(isbn.isbnLiteral())
@@ -72,8 +73,8 @@ public class BookSqlRepository implements BookRepository {
         var deleteRelationshipQuery = bookQueries.getQuery(BookQueryName.DELETE_BOOK_RELATIONSHIP_WITH_AUTHORS);
         var deleteBook = bookQueries.getQuery(BookQueryName.DELETE_BOOK);
         var params = new MapSqlParameterSource(BOOK_ISBN_QUERY_PARAM, book.getIsbn());
-        namedParameterJdbcOperations.update(deleteRelationshipQuery, params);
-        namedParameterJdbcOperations.update(deleteBook, params);
+        jdbcOperations.update(deleteRelationshipQuery, params);
+        jdbcOperations.update(deleteBook, params);
     }
 
     @Override
@@ -95,11 +96,11 @@ public class BookSqlRepository implements BookRepository {
                 .addValue(BOOK_ISBN_QUERY_PARAM, cleansedIsbn)
                 .addValue(BOOK_TITLE_QUERY_PARAM, book.getTitle());
 
-        namedParameterJdbcOperations.update(insertBookQuery, queryParams);
+        jdbcOperations.update(insertBookQuery, queryParams);
     }
 
     private void derelateNotContainedAuthors(Book book) {
-        namedParameterJdbcOperations.update(
+        jdbcOperations.update(
                 bookQueries.getQuery(BookQueryName.DERELATE_BOOK_WITH_NOT_GIVEN_AUTHORS),
                 new MapSqlParameterSource(BOOK_ISBN_QUERY_PARAM, book.getIsbn())
                         .addValue(AUTHOR_ID_QUERY_PARAMS, book.getAuthorsIds())
@@ -112,7 +113,7 @@ public class BookSqlRepository implements BookRepository {
                         .addValue(AUTHOR_ID_QUERY_PARAMS, authorId))
                 .toArray(SqlParameterSource[]::new);
 
-        namedParameterJdbcOperations.batchUpdate(
+        jdbcOperations.batchUpdate(
                 bookQueries.getQuery(BookQueryName.RELATE_BOOK_WITH_AUTHOR),
                 authorsAsParameters
         );
