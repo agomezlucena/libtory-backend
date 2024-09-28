@@ -1,23 +1,6 @@
-plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.3.2'
-}
-
 group = 'io.github.agomezlucena'
 version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
-}
-
-ext {
-    junitVersion = "5.10.+"
-    mockitoVersion = "5.11.+"
-    datafakerVersion = "2.2.+"
-    jspecifyVersion = "1.0.+"
-    springBootVersion = "3.3.2"
-}
-
-bootJar{
-    enabled=false
 }

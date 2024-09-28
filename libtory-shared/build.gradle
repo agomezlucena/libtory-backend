@@ -9,10 +9,12 @@ repositories {
 }
 
 dependencies {
-    testFixturesApi "net.datafaker:datafaker:${datafakerVersion}"
-    testFixturesApi "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testFixturesApi libs.datafaker
+    testFixturesApi libs.junit
+
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
-    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation libs.junit
+    testImplementation libs.mockito
 }
 
 test {

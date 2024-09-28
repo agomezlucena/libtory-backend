@@ -1,5 +1,8 @@
-apply plugin: 'java'
-apply plugin: 'org.springframework.boot'
+plugins {
+    id 'java'
+    alias(libs.plugins.springBoot) apply(true)
+}
+
 
 group = 'io.github.agomezlucena'
 version = '1.0-SNAPSHOT'
@@ -9,12 +12,12 @@ repositories {
 }
 
 dependencies {
-    implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    implementation platform(libs.springBootBom)
     implementation "org.springframework.boot:spring-boot-starter"
-    implementation 'org.liquibase:liquibase-core'
-
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-jdbc"
+    implementation 'org.postgresql:postgresql'
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
 
     implementation project(":libtory-books")
 }

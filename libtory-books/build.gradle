@@ -1,5 +1,7 @@
-apply plugin: 'java'
-apply plugin: 'org.springframework.boot'
+plugins {
+    alias(libs.plugins.springBoot) apply(true)
+    id "java"
+}
 
 group = 'io.github.agomezlucena'
 version = '1.0-SNAPSHOT'
@@ -16,12 +18,12 @@ test {
 }
 
 dependencies {
-    implementation "org.jspecify:jspecify:${jspecifyVersion}"
-    implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    implementation platform (libs.springBootBom)
     implementation "org.springframework.boot:spring-boot-starter"
     implementation "org.springframework.boot:spring-boot-starter-jdbc"
     implementation 'org.liquibase:liquibase-core'
     implementation project(":libtory-shared")
+    implementation libs.jspecify
 
     testImplementation testFixtures(project(":libtory-shared"))
     testImplementation 'org.testcontainers:junit-jupiter'
