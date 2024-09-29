@@ -16,19 +16,19 @@
         for update
     </entry>
     <entry key="save-book-information">
-        insert into books (isbn,title)
+        insert into books as b (isbn,title)
         values
             (:book_isbn,:book_title)
-        on conflict do
+        on conflict (isbn) do
         update
-            set title = :book_title
-            where isbn = :book_isbn
+            set title = excluded.title
+            where b.isbn = excluded.isbn
     </entry>
     <entry key="save-author-information">
         insert into authors (author_id,author_name)
         values
             (:author_id,:author_name)
-        on conflict do
+        on conflict (author_id) do
         update set author_name = :author_name
             where author_id = :author_id
     </entry>
