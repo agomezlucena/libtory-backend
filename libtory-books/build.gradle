@@ -12,6 +12,7 @@ repositories {
 bootJar{
     enabled=false
 }
+
 test {
     useJUnitPlatform()
     forkEvery 2
@@ -21,16 +22,14 @@ dependencies {
     implementation platform (libs.springBootBom)
     implementation "org.springframework.boot:spring-boot-starter"
     implementation "org.springframework.boot:spring-boot-starter-jdbc"
-    implementation 'org.liquibase:liquibase-core'
     implementation project(":libtory-shared")
     implementation libs.jspecify
+    runtimeOnly 'org.postgresql:postgresql'
 
     testImplementation testFixtures(project(":libtory-shared"))
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.liquibase:liquibase-core'
     testImplementation 'org.testcontainers:postgresql'
-    runtimeOnly 'org.postgresql:postgresql'
-    runtimeOnly 'org.springframework.boot:spring-boot-docker-compose'
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
