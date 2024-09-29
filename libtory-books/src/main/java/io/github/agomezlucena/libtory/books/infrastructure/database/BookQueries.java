@@ -1,11 +1,8 @@
 package io.github.agomezlucena.libtory.books.infrastructure.database;
 
-import org.springframework.stereotype.Component;
-
 import java.io.IOException;
 import java.util.Properties;
 
-@Component
 public class BookQueries {
     private final Properties queryProperties;
 

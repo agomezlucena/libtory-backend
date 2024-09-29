@@ -4,20 +4,17 @@ import io.github.agomezlucena.libtory.books.domain.Book;
 import io.github.agomezlucena.libtory.books.domain.BookPrimitives;
 import io.github.agomezlucena.libtory.books.domain.BookRepository;
 import io.github.agomezlucena.libtory.books.domain.Isbn;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 import static io.github.agomezlucena.libtory.books.infrastructure.database.BookQueries.BookQueryName;
 
-@Repository
-public class BookSqlRepository implements BookRepository {
+public class  BookSqlRepository implements BookRepository {
     private static final String BOOK_ISBN_QUERY_PARAM = "book_isbn";
     private static final String BOOK_TITLE_QUERY_PARAM = "book_title";
     private static final String AUTHOR_ID_QUERY_PARAMS = "author_id";
@@ -27,7 +24,6 @@ public class BookSqlRepository implements BookRepository {
 
     public BookSqlRepository(
             final BookQueries bookQueries,
-            @Qualifier("booksNamedParameterOperations")
             final NamedParameterJdbcOperations jdbcOperations
     ) {
         this.bookQueries = bookQueries;
