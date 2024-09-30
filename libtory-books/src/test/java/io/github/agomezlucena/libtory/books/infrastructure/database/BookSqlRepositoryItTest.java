@@ -1,5 +1,6 @@
 package io.github.agomezlucena.libtory.books.infrastructure.database;
 
+import io.github.agomezlucena.libtory.books.domain.AuthorChecker;
 import io.github.agomezlucena.libtory.books.domain.Book;
 import io.github.agomezlucena.libtory.books.domain.BookPrimitives;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension;
@@ -16,9 +17,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 @DisplayName("BookSqlRepository should do in database")
 @ExtendWith(DataFakerExtension.class)
@@ -28,6 +29,8 @@ class BookSqlRepositoryItTest {
     private BookSqlRepository bookSqlRepository;
     @Autowired
     private NamedParameterJdbcOperations namedParameterJdbcOperations;
+    @Autowired
+    private AuthorChecker authorChecker;
 
     @BeforeEach
     public void setUpBooksAndAuthorsInDatabase() {
@@ -74,18 +77,18 @@ class BookSqlRepositoryItTest {
                 where book_isbn not in ('9781914602108','9780785839996')
                 """;
 
-        namedParameterJdbcOperations.getJdbcOperations().execute(deleteBookSql);
         namedParameterJdbcOperations.getJdbcOperations().execute(deleteAuthorRelationShip);
+        namedParameterJdbcOperations.getJdbcOperations().execute(deleteBookSql);
     }
 
     @Test
-    @DisplayName("create a new book if doesn't exists")
-    void createNewBookIfDoesNotExist(
+    @DisplayName("create a new record in books table if book does not exists")
+    void createNewRecordInBooksTableIfBookDoesNotExist(
             @FakerIsbn(avoidIsbn = "9781914602108;9780785839996") String isbn,
             @FakerBookTitle String title
     ) {
         var givenBookPrimitives = new BookPrimitives(isbn, title);
-        var givenBook = Book.createBook(givenBookPrimitives, mock());
+        var givenBook = Book.createBook(givenBookPrimitives, authorChecker);
 
         bookSqlRepository.save(givenBook);
         var verificationQuery = "select count(*) = 1 from books where isbn = :isbn";
@@ -103,13 +106,13 @@ class BookSqlRepositoryItTest {
     }
 
     @Test
-    @DisplayName("update book if already exists")
-    void updateBookIfAlreadyExists(
+    @DisplayName("update record in books table if already exists")
+    void updateRecordInBooksTableIfAlreadyExists(
             @FakerIsbn(avoidIsbn = "9781914602108;9780785839996") String isbn,
             @FakerBookTitle String title
     ) {
         var givenBookPrimitives = new BookPrimitives(isbn, title);
-        var givenBook = Book.createBook(givenBookPrimitives, mock());
+        var givenBook = Book.createBook(givenBookPrimitives, authorChecker);
 
         bookSqlRepository.save(givenBook);
         givenBook.setTitle("another test title");
@@ -122,6 +125,31 @@ class BookSqlRepositoryItTest {
                         Map.of("isbn", isbn, "title", givenBook.getTitle()),
                         Boolean.class
                 ))
+                .orElse(false);
+        assertTrue(result);
+    }
+
+    @Test
+    @DisplayName("create a new record in book authors for each author id that the given book has when is newly created")
+    void createANewRecordInBookAuthorsForEachAuthorIdThatTheGivenBookHasWhenIsNewlyCreated(
+            @FakerIsbn(avoidIsbn = "9781914602108;9780785839996") String isbn,
+            @FakerBookTitle String title
+    ){
+        var givenBookPrimitives = new BookPrimitives(
+                isbn,
+                title,
+                UUID.fromString("123e4567-e89b-12d3-a456-426614174001")
+        );
+
+        var givenBook = Book.createBook(givenBookPrimitives, authorChecker);
+        bookSqlRepository.save(givenBook);
+        var verificationQuery = "select count(*) = 1 from book_authors where book_isbn = :isbn";
+        var result = Optional.ofNullable(
+                        namedParameterJdbcOperations.queryForObject(
+                                verificationQuery,
+                                Map.of("isbn", isbn, "title", givenBook.getTitle()),
+                                Boolean.class
+                        ))
                 .orElse(false);
         assertTrue(result);
     }
