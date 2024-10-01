@@ -67,6 +67,10 @@ public class Book {
         return authorsId.ids();
     }
 
+    /**
+     * will return if the book has authors
+     * @return true when have any false when not.
+     */
     public boolean hasAuthors(){
         return !authorsId.isEmpty();
     }
@@ -75,6 +79,7 @@ public class Book {
      * update authors adding or deleting the given authors based in the command past by parameter.
      * @param command and adding author command or deleting author command.
      * @throws InvalidAuthor if you try to add a not registered author in our systems.
+     * @see AuthorUpdateCommand
      */
     public void updateAuthors(@NonNull AuthorUpdateCommand command) {
         switch (command) {
