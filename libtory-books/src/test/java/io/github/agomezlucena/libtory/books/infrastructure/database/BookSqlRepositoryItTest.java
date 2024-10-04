@@ -3,6 +3,7 @@ package io.github.agomezlucena.libtory.books.infrastructure.database;
 import io.github.agomezlucena.libtory.books.domain.AuthorChecker;
 import io.github.agomezlucena.libtory.books.domain.Book;
 import io.github.agomezlucena.libtory.books.domain.BookPrimitives;
+import io.github.agomezlucena.libtory.books.domain.Isbn;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension.FakerBookTitle;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension.FakerIsbn;
@@ -20,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("BookSqlRepository should do in database")
 @ExtendWith(DataFakerExtension.class)
@@ -39,7 +40,8 @@ class BookSqlRepositoryItTest {
                 INSERT INTO books.books (isbn, title)
                 VALUES
                 ('9781914602108', 'The Iliad'),
-                ('9780785839996', 'The Great Gatsby')
+                ('9780785839996', 'The Great Gatsby'),
+                ('9780201616224','The Pragmatic Programmer: From Journeyman to Master')
                 ON CONFLICT (isbn) do update
                     set title = excluded.title
                 """;
@@ -48,7 +50,9 @@ class BookSqlRepositoryItTest {
                 INSERT INTO books.authors (author_id, author_name)
                 VALUES
                 ('123e4567-e89b-12d3-a456-426614174000', 'Homer'),
-                ('123e4567-e89b-12d3-a456-426614174001', 'F. Scott Fitzgerald')
+                ('123e4567-e89b-12d3-a456-426614174001', 'F. Scott Fitzgerald'),
+                ('123e4567-e89b-12d3-a456-426614174002', 'Andrew Hunt'),
+                ('123e4567-e89b-12d3-a456-426614174003', 'David Thomas')
                 on conflict do nothing
                 """;
 
@@ -56,7 +60,9 @@ class BookSqlRepositoryItTest {
                 INSERT INTO books.book_authors (book_isbn, author_id)
                 VALUES
                 ('9781914602108', '123e4567-e89b-12d3-a456-426614174000'),
-                ('9780785839996', '123e4567-e89b-12d3-a456-426614174001')
+                ('9780785839996', '123e4567-e89b-12d3-a456-426614174001'),
+                ('9780201616224','123e4567-e89b-12d3-a456-426614174002'),
+                ('9780201616224','123e4567-e89b-12d3-a456-426614174003')
                 on conflict do nothing
                 """;
 
@@ -70,12 +76,12 @@ class BookSqlRepositoryItTest {
     public void deletedNonFixedTestData() {
         var deleteBookSql = """
                 delete from books.books
-                where isbn not in ('9781914602108','9780785839996')
+                where isbn not in ('9781914602108','9780785839996','9780201616224')
                 """;
 
         var deleteAuthorRelationShip = """
                 delete from books.book_authors
-                where book_isbn not in ('9781914602108','9780785839996')
+                where book_isbn not in ('9781914602108','9780785839996','9780201616224')
                 """;
 
         namedParameterJdbcOperations.getJdbcOperations().execute(deleteAuthorRelationShip);
@@ -85,7 +91,7 @@ class BookSqlRepositoryItTest {
     @Test
     @DisplayName("when saving a new book will create a new record in books table")
     void createNewRecordInBooksTableIfBookDoesNotExist(
-            @FakerIsbn(avoidIsbn = "9781914602108;9780785839996") String isbn,
+            @FakerIsbn(avoidIsbn = "9781914602108;9780785839996;9780201616224") String isbn,
             @FakerBookTitle String title
     ) {
         var givenBookPrimitives = new BookPrimitives(isbn, title);
@@ -109,7 +115,7 @@ class BookSqlRepositoryItTest {
     @Test
     @DisplayName("when saving a existing book will update the existing record at book table")
     void updateRecordInBooksTableIfAlreadyExists(
-            @FakerIsbn(avoidIsbn = "9781914602108;9780785839996") String isbn,
+            @FakerIsbn(avoidIsbn = "9781914602108;9780785839996;9780201616224") String isbn,
             @FakerBookTitle String title
     ) {
         var givenBookPrimitives = new BookPrimitives(isbn, title);
@@ -138,7 +144,7 @@ class BookSqlRepositoryItTest {
                  """
     )
     void createANewRecordInBookAuthorsForEachAuthorIdThatTheGivenBookHasWhenIsNewlyCreated(
-            @FakerIsbn(avoidIsbn = "9781914602108;9780785839996") String isbn,
+            @FakerIsbn(avoidIsbn = "9781914602108;9780785839996;9780201616224") String isbn,
             @FakerBookTitle String title
     ){
         var givenBookPrimitives = new BookPrimitives(
@@ -222,5 +228,23 @@ class BookSqlRepositoryItTest {
                         ))
                 .orElse(false);
         assertTrue(result);
+    }
+
+    @Test
+    @DisplayName("find the record by id if exist and return an optional with the information of that record")
+    void shouldFinTheRecordByIdIfExistAndReturnAnOptionalWithTheInformation(){
+        var givenIsbn = Isbn.fromString("9780201616224");
+        var expectedBook = new BookPrimitives(
+                "9780201616224",
+                "The Pragmatic Programmer: From Journeyman to Master",
+                UUID.fromString("123e4567-e89b-12d3-a456-426614174002"),
+                UUID.fromString("123e4567-e89b-12d3-a456-426614174003")
+        ).toBook();
+
+        var obtainedValue = bookSqlRepository.findByIsbn(givenIsbn);
+        assertNotNull(obtainedValue);
+        assertEquals(Optional.of(expectedBook), obtainedValue);
+        assertEquals(expectedBook.getTitle(),obtainedValue.get().getTitle());
+        assertEquals(expectedBook.getAuthorsIds(),obtainedValue.get().getAuthorsIds());
     }
 }

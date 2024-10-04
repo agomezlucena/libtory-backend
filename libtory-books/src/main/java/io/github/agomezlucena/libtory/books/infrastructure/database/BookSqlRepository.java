@@ -31,8 +31,7 @@ public class  BookSqlRepository implements BookRepository {
     }
 
     @Override
-    @Transactional
-    public Optional<Book> findByIsbnLocking(Isbn isbn) {
+    public Optional<Book> findByIsbn(Isbn isbn) {
         return jdbcOperations.query(
                 bookQueries.getQuery(BookQueryName.GET_BOOK_INFORMATION),
                 new MapSqlParameterSource(BOOK_ISBN_QUERY_PARAM, isbn.isbnLiteral()),

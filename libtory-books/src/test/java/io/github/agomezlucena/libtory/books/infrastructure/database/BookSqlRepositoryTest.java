@@ -141,7 +141,7 @@ class BookSqlRepositoryTest {
                 (ResultSetExtractor<Optional<Book>>) notNull())
         ).thenReturn(expectedOutput);
 
-        var result = repository.findByIsbnLocking(Isbn.fromString(givenIsbn));
+        var result = repository.findByIsbn(Isbn.fromString(givenIsbn));
         assertNotNull(result);
         assertEquals(expectedOutput, result);
         var params = givenCaptor.getValue();
