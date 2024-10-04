@@ -232,7 +232,7 @@ class BookSqlRepositoryItTest {
 
     @Test
     @DisplayName("find the record by id if exist and return an optional with the information of that record")
-    void shouldFinTheRecordByIdIfExistAndReturnAnOptionalWithTheInformation(){
+    void shouldFindTheRecordByIdIfExistAndReturnAnOptionalWithTheInformation(){
         var givenIsbn = Isbn.fromString("9780201616224");
         var expectedBook = new BookPrimitives(
                 "9780201616224",
@@ -246,5 +246,18 @@ class BookSqlRepositoryItTest {
         assertEquals(Optional.of(expectedBook), obtainedValue);
         assertEquals(expectedBook.getTitle(),obtainedValue.get().getTitle());
         assertEquals(expectedBook.getAuthorsIds(),obtainedValue.get().getAuthorsIds());
+    }
+
+    @Test
+    @DisplayName("remove existing record in books table and book_authors when a book is deleted")
+    void shouldRemoveExistingRecordsInBooksTableAndBookAuthorsWhenABookIsDeleted(){
+        var givenBook = new BookPrimitives("9780785839996","The Great Gatsby").toBook();
+        bookSqlRepository.delete(givenBook);
+        var query = """
+                select ((select count(*) from book_authors where book_isbn = '9780785839996') +
+                       (select count(*) from books where isbn = '9780785839996')) = 0
+                """;
+        var result = namedParameterJdbcOperations.queryForObject(query, Collections.emptyMap(),Boolean.class);
+        assertEquals(Boolean.TRUE, result);
     }
 }
