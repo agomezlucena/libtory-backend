@@ -7,10 +7,16 @@
         where author_id in (:expectedAuthors)
     </entry>
     <entry key="get-book-information">
+        with locked_authors as (
+            select book_isbn,author_id
+            from book_authors
+            where book_isbn = :book_isbn
+            for update
+        )
         select b.isbn as book_isbn, b.title as book_title, ba.author_id
         from
             books b left join
-            book_authors ba on b.isbn = ba.book_isbn
+            locked_authors ba on b.isbn = ba.book_isbn
         where
             b.isbn = :book_isbn
         for update of b
