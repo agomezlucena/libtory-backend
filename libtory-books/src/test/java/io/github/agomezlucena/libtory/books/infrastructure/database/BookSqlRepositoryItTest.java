@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -82,7 +83,7 @@ class BookSqlRepositoryItTest {
     }
 
     @Test
-    @DisplayName("create a new record in books table if book does not exists")
+    @DisplayName("when saving a new book will create a new record in books table")
     void createNewRecordInBooksTableIfBookDoesNotExist(
             @FakerIsbn(avoidIsbn = "9781914602108;9780785839996") String isbn,
             @FakerBookTitle String title
@@ -106,7 +107,7 @@ class BookSqlRepositoryItTest {
     }
 
     @Test
-    @DisplayName("update record in books table if already exists")
+    @DisplayName("when saving a existing book will update the existing record at book table")
     void updateRecordInBooksTableIfAlreadyExists(
             @FakerIsbn(avoidIsbn = "9781914602108;9780785839996") String isbn,
             @FakerBookTitle String title
@@ -130,7 +131,12 @@ class BookSqlRepositoryItTest {
     }
 
     @Test
-    @DisplayName("create a new record in book authors for each author id that the given book has when is newly created")
+    @DisplayName(
+                 """
+                 when saving a new book with existing authors will create a new record for each author id
+                 in book_authors
+                 """
+    )
     void createANewRecordInBookAuthorsForEachAuthorIdThatTheGivenBookHasWhenIsNewlyCreated(
             @FakerIsbn(avoidIsbn = "9781914602108;9780785839996") String isbn,
             @FakerBookTitle String title
@@ -154,5 +160,67 @@ class BookSqlRepositoryItTest {
         assertTrue(result);
     }
 
+    @Test
+    @DisplayName(
+            """
+            when saving an existing book with authors in database will remove the records in book_authors that
+            aren't present in the given book
+            """
+    )
+    void mustDeleteNotPresentAuthorInDatabaseWhenIsNotPresentWhenSaving(){
+        var preconditionQuery = """
+                insert into book_authors (book_isbn,author_id)
+                values ('9781914602108','123e4567-e89b-12d3-a456-426614174001')
+                """;
+        namedParameterJdbcOperations.update(preconditionQuery, Collections.emptyMap());
 
+        var primitives = new BookPrimitives(
+                "9781914602108",
+                "The Iliad",
+                UUID.fromString("123e4567-e89b-12d3-a456-426614174000")
+        );
+
+        var givenBook = Book.createBook(primitives, authorChecker);
+        bookSqlRepository.save(givenBook);
+
+        var verificationQuery = "select count(*) = 1 from book_authors where book_isbn = '9781914602108'";
+
+        var result = Optional.ofNullable(
+                        namedParameterJdbcOperations.queryForObject(
+                                verificationQuery,
+                                Collections.emptyMap(),
+                                Boolean.class
+                        ))
+                .orElse(false);
+        assertTrue(result);
+    }
+
+    @Test
+    @DisplayName(
+            """
+            when saving an existing book that have authors in db but the given book does not have any.
+            will remove all records for book in book_authors table
+            """
+    )
+    void mustDeleteAllRelatedBookAuthorForAExistingBook(){
+
+        var primitives = new BookPrimitives(
+                "9781914602108",
+                "The Iliad"
+        );
+
+        var givenBook = Book.createBook(primitives, authorChecker);
+        bookSqlRepository.save(givenBook);
+
+        var verificationQuery = "select count(*) = 0 from book_authors where book_isbn = '9781914602108'";
+
+        var result = Optional.ofNullable(
+                        namedParameterJdbcOperations.queryForObject(
+                                verificationQuery,
+                                Collections.emptyMap(),
+                                Boolean.class
+                        ))
+                .orElse(false);
+        assertTrue(result);
+    }
 }

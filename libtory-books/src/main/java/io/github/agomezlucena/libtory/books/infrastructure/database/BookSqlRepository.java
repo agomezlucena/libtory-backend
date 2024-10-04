@@ -77,7 +77,6 @@ public class  BookSqlRepository implements BookRepository {
     @Transactional
     public void save(Book book) {
         updateBook(book);
-        if (!book.hasAuthors()) return;
         derelateNotContainedAuthors(book);
         relateContainedAuthors(book);
     }
@@ -96,6 +95,14 @@ public class  BookSqlRepository implements BookRepository {
     }
 
     private void derelateNotContainedAuthors(Book book) {
+        if(!book.hasAuthors()){
+            jdbcOperations.update(
+                    bookQueries.getQuery(BookQueryName.DELETE_BOOK_RELATIONSHIP_WITH_AUTHORS),
+                    new MapSqlParameterSource(BOOK_ISBN_QUERY_PARAM, book.getIsbn())
+            );
+            return;
+        }
+
         jdbcOperations.update(
                 bookQueries.getQuery(BookQueryName.DERELATE_BOOK_WITH_NOT_GIVEN_AUTHORS),
                 new MapSqlParameterSource(BOOK_ISBN_QUERY_PARAM, book.getIsbn())
@@ -104,6 +111,8 @@ public class  BookSqlRepository implements BookRepository {
     }
 
     private void relateContainedAuthors(Book book) {
+        if(!book.hasAuthors()) return;
+
         var authorsAsParameters = book.getAuthorsIds().stream()
                 .map(authorId -> new MapSqlParameterSource(BOOK_ISBN_QUERY_PARAM, book.getIsbn())
                         .addValue(AUTHOR_ID_QUERY_PARAMS, authorId))

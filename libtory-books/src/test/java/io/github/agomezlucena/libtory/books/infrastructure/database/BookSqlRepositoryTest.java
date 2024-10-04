@@ -47,19 +47,21 @@ class BookSqlRepositoryTest {
     void shouldSaveABookIfThatBookDoesNotExist(@FakerIsbn String isbn) {
         var saveQueryExistenceParameterCaptor = ArgumentCaptor.forClass(SqlParameterSource.class);
         var bookSaveQuery = queries.getQuery(BookQueryName.SAVE_BOOK_INFORMATION);
+        var authorDeletionQuery = queries.getQuery(BookQueryName.DELETE_BOOK_RELATIONSHIP_WITH_AUTHORS);
         var givenBook = createBookWithIsbnAndAuthors(isbn);
 
         when(jdbcOperations.update(eq(bookSaveQuery), saveQueryExistenceParameterCaptor.capture())).thenReturn(1);
+        when(jdbcOperations.update(eq(authorDeletionQuery),saveQueryExistenceParameterCaptor.capture())).thenReturn(0);
 
         repository.save(givenBook);
 
-        var insertQueryParams = saveQueryExistenceParameterCaptor.getValue();
+        var insertQueryParams = saveQueryExistenceParameterCaptor.getAllValues();
 
-        assertEquals(givenBook.getIsbn(), insertQueryParams.getValue("book_isbn"));
-        assertEquals(givenBook.getTitle(), insertQueryParams.getValue("book_title"));
-
-        verify(jdbcOperations).update(bookSaveQuery, insertQueryParams);
-        verifyNoMoreInteractions(jdbcOperations);
+        assertEquals(givenBook.getIsbn(), insertQueryParams.getFirst().getValue("book_isbn"));
+        assertEquals(givenBook.getTitle(), insertQueryParams.getFirst().getValue("book_title"));
+        assertEquals(givenBook.getIsbn(),insertQueryParams.get(1).getValue("book_isbn"));
+        verify(jdbcOperations).update(bookSaveQuery, insertQueryParams.getFirst());
+        verify(jdbcOperations).update(authorDeletionQuery, insertQueryParams.get(1));
     }
 
     @Test
