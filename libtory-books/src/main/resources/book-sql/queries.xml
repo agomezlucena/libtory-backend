@@ -13,7 +13,7 @@
             book_authors ba on b.isbn = ba.book_isbn
         where
             b.isbn = :book_isbn
-        for update
+        for update of b
     </entry>
     <entry key="save-book-information">
         insert into books as b (isbn,title)
