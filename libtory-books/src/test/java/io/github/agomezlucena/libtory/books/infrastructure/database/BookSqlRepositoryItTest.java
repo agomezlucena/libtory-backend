@@ -6,7 +6,7 @@ import io.github.agomezlucena.libtory.books.domain.BookPrimitives;
 import io.github.agomezlucena.libtory.books.domain.Isbn;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension.FakerBookTitle;
-import io.github.agomezlucena.libtory.shared.DataFakerExtension.FakerIsbn;
+import io.github.agomezlucena.libtory.shared.FakerIsbn;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

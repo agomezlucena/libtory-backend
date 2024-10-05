@@ -1,6 +1,7 @@
 package io.github.agomezlucena.libtory.books.domain;
 
 import io.github.agomezlucena.libtory.shared.DataFakerExtension;
+import io.github.agomezlucena.libtory.shared.FakerIsbn;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,7 +11,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static io.github.agomezlucena.libtory.shared.DataFakerExtension.FakerIsbn;
 import static io.github.agomezlucena.libtory.shared.DataFakerExtension.FakerBookTitle;
 
 @ExtendWith(DataFakerExtension.class)

@@ -13,11 +13,13 @@ import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
-import static io.github.agomezlucena.libtory.shared.DataFakerExtension.FakerIsbn.IsbnType.ISBN_13;
+import static io.github.agomezlucena.libtory.shared.FakerIsbn.IsbnType.ISBN_13;
 
 public class DataFakerExtension implements ParameterResolver {
     private final Faker faker = new Faker();
+    private final Set<String> generatedIsbns = new ConcurrentSkipListSet<>();
 
     @Override
     public boolean supportsParameter(
@@ -52,31 +54,34 @@ public class DataFakerExtension implements ParameterResolver {
                 .map(Set::of)
                 .orElseGet(Collections::emptySet);
 
+        String generatedIsbn = (isbn.dontRepeat()) ?
+                generateNotRepeated(isbn, avoidedIsbn) :
+                generateAvoiding(isbn, avoidedIsbn);
+
+        generatedIsbns.add(generatedIsbn);
+        return generatedIsbn;
+    }
+
+    private String generateAvoiding(FakerIsbn isbn, Set<String> avoidedIsbn) {
         String generatedIsbn;
         do {
-            generatedIsbn = (ISBN_13.equals(isbn.value())) ?
-                    faker.code().isbn13(isbn.withHyphens()) :
-                    faker.code().isbn10(isbn.withHyphens());
+            generatedIsbn = generateIsbn(isbn);
         } while (avoidedIsbn.contains(generatedIsbn));
         return generatedIsbn;
     }
 
-    @Target(ElementType.PARAMETER)
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface FakerIsbn {
-        enum IsbnType {
-            ISBN_13,
-            ISBN_10
-        }
+    private String generateNotRepeated(FakerIsbn isbn, Set<String> avoidedIsbn) {
+        String generatedIsbn;
+        do {
+            generatedIsbn = generateIsbn(isbn);
+        } while (avoidedIsbn.contains(generatedIsbn) || generatedIsbns.contains(generatedIsbn));
+        return generatedIsbn;
+    }
 
-        /// if you define this value as not blank value will generate ISBN that aren't in the
-        /// declared isbn should be separated by a semicolon character ';' null values are treated
-        /// like an empty string
-        String avoidIsbn() default "";
-
-        IsbnType value() default ISBN_13;
-
-        boolean withHyphens() default false;
+    private String generateIsbn(FakerIsbn isbn) {
+        return (ISBN_13.equals(isbn.value())) ?
+                faker.code().isbn13(isbn.withHyphens()) :
+                faker.code().isbn10(isbn.withHyphens());
     }
 
     @Target(ElementType.PARAMETER)
