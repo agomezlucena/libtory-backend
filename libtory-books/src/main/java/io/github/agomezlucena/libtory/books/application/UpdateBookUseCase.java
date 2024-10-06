@@ -2,6 +2,7 @@ package io.github.agomezlucena.libtory.books.application;
 
 import io.github.agomezlucena.libtory.books.domain.*;
 import io.github.agomezlucena.libtory.shared.cqrs.CommandHandler;
+import org.jspecify.annotations.NonNull;
 
 /// This use case allows you to create or update an existing book
 /// @author Alejandro Gómez Lucena
@@ -24,7 +25,7 @@ public class UpdateBookUseCase implements CommandHandler<BookPrimitives> {
     /// @see Book
     /// @see BookPrimitives
     @Override
-    public void handleCommand(BookPrimitives command) {
+    public void handleCommand(@NonNull BookPrimitives command) {
         repository.save(Book.createBook(command, checker));
     }
 }
