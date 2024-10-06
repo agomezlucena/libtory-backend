@@ -27,11 +27,4 @@ public class UpdateBookUseCase implements CommandHandler<BookPrimitives> {
     public void handleCommand(BookPrimitives command) {
         repository.save(Book.createBook(command, checker));
     }
-
-    /// will check if the given class is a supported class for this handler
-    /// @return true -> BookPrimitives.class
-    @Override
-    public boolean canHandle(Class<?> commandClass) {
-        return BookPrimitives.class.equals(commandClass);
-    }
 }
