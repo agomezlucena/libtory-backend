@@ -97,6 +97,11 @@ public class Book {
 
     private void addAuthors(BookRepository repository, AuthorChecker checker, UUID... authorIds) {
         if (!checker.authorsExists(authorIds)) throw new InvalidAuthor();
+        var currentAuthors = this.authorsId;
+        var newAuthors = currentAuthors.addAuthors(authorIds);
+
+        if(currentAuthors.equals(newAuthors)) return;
+
         this.authorsId = this.authorsId.addAuthors(authorIds);
         repository.save(this);
     }
