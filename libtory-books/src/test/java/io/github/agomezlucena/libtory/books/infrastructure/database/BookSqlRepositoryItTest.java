@@ -249,10 +249,9 @@ class BookSqlRepositoryItTest {
     }
 
     @Test
-    @DisplayName("remove existing record in books table and book_authors when a book is deleted")
-    void shouldRemoveExistingRecordsInBooksTableAndBookAuthorsWhenABookIsDeleted(){
-        var givenBook = new BookPrimitives("9780785839996","The Great Gatsby").toBook();
-        bookSqlRepository.delete(givenBook);
+    @DisplayName("remove existing record in books table and book_authors when a book is deleted by isbn")
+    void shouldRemoveExistingRecordsInBooksTableAndBookAuthorsWhenABookIsDeletedByIsbn(){
+        bookSqlRepository.delete(Isbn.fromString("9780785839996"));
         var query = """
                 select ((select count(*) from book_authors where book_isbn = '9780785839996') +
                        (select count(*) from books where isbn = '9780785839996')) = 0

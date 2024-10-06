@@ -64,10 +64,10 @@ public class  BookSqlRepository implements BookRepository {
 
     @Override
     @Transactional
-    public void delete(Book book) {
+    public void delete(Isbn isbn) {
         var deleteRelationshipQuery = bookQueries.getQuery(BookQueryName.DELETE_BOOK_RELATIONSHIP_WITH_AUTHORS);
         var deleteBook = bookQueries.getQuery(BookQueryName.DELETE_BOOK);
-        var params = new MapSqlParameterSource(BOOK_ISBN_QUERY_PARAM, book.getIsbn());
+        var params = new MapSqlParameterSource(BOOK_ISBN_QUERY_PARAM, isbn.isbnLiteral());
         jdbcOperations.update(deleteRelationshipQuery, params);
         jdbcOperations.update(deleteBook, params);
     }

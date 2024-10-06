@@ -104,9 +104,9 @@ class BookSqlRepositoryTest {
     }
 
     @Test
-    @DisplayName("remove the given book")
+    @DisplayName("call the expected queries when a book is removed by isbn")
     void shouldRemoveGivenBook(@FakerIsbn String isbn) {
-        var givenBook = createBookWithIsbnAndAuthors(isbn);
+        var givenIsbn = Isbn.fromString(isbn);
         var captor = ArgumentCaptor.forClass(SqlParameterSource.class);
         var deleteBookRelationshipWithAuthorsQuery = queries.getQuery(BookQueryName.DELETE_BOOK_RELATIONSHIP_WITH_AUTHORS);
         var deleteBookQuery = queries.getQuery(BookQueryName.DELETE_BOOK);
@@ -114,7 +114,7 @@ class BookSqlRepositoryTest {
         when(jdbcOperations.update(eq(deleteBookRelationshipWithAuthorsQuery), captor.capture())).thenReturn(1);
         when(jdbcOperations.update(eq(deleteBookQuery), captor.capture())).thenReturn(1);
 
-        repository.delete(givenBook);
+        repository.delete(givenIsbn);
 
         verify(jdbcOperations, times(2)).update(anyString(), notNull(SqlParameterSource.class));
         var givenParameters = captor.getAllValues();
@@ -124,8 +124,8 @@ class BookSqlRepositoryTest {
         var firstQueryParam = givenParameters.getFirst();
         var secondQueryParam = givenParameters.get(1);
 
-        assertEquals(givenBook.getIsbn(), firstQueryParam.getValue("book_isbn"));
-        assertEquals(givenBook.getIsbn(), secondQueryParam.getValue("book_isbn"));
+        assertEquals(givenIsbn.isbnLiteral(), firstQueryParam.getValue("book_isbn"));
+        assertEquals(givenIsbn.isbnLiteral(), secondQueryParam.getValue("book_isbn"));
     }
 
     @Test
