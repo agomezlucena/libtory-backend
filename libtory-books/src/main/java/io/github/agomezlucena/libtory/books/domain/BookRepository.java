@@ -4,6 +4,6 @@ import java.util.Optional;
 
 public interface BookRepository {
     Optional<Book> findByIsbn(Isbn isbn);
-    void delete(Book book);
+    void delete(Isbn isbn);
     void save(Book book);
 }
