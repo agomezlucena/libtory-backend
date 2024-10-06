@@ -35,6 +35,7 @@ record AuthorsId(Set<UUID> ids) {
      * @return <p>if ids is not null and is not empty return the expected value.</p>
      * <p>if ids are null or empty return the called object.</p>
      * <p>if called object is empty return a new AuthorId with the input</p>
+     * <p>if both are empty will return the empty shared instance</p>
      */
     public @NonNull AuthorsId addAuthors(@Nullable UUID... ids){
         if(ids == null || ids.length == 0) return this;
