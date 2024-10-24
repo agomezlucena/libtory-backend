@@ -26,6 +26,7 @@ public class UpdateBookUseCase implements CommandHandler<BookPrimitives> {
     /// @see BookPrimitives
     @Override
     public void handleCommand(@NonNull BookPrimitives command) {
-        repository.save(Book.createBook(command, checker));
+        var createdBook = Book.createBook(command,checker);
+        repository.save(createdBook);
     }
 }
