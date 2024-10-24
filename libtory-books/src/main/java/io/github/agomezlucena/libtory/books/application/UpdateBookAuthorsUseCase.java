@@ -25,14 +25,13 @@ public class UpdateBookAuthorsUseCase implements CommandHandler<UpdateAuthorsCom
     @Override
     public void handleCommand(@NonNull UpdateAuthorsCommand command) {
         if (command == null) throw new InvalidUpdateAuthorCommand("you can't update without data");
-        bookRepository.findByIsbn(command.getIsbn())
-                .ifPresent(book -> book.updateAuthors(prepareCommand(command)));
-    }
 
-    private AuthorUpdateCommand prepareCommand(UpdateAuthorsCommand command) {
-        return switch (command.updateType()) {
+        var authorUpdateCommand =  switch (command.updateType()) {
             case ADDITION -> AuthorUpdateCommand.addAuthors(authorChecker, bookRepository, command.authorsIds());
             case DELETION -> AuthorUpdateCommand.deleteAuthors(bookRepository, command.authorsIds());
         };
+
+        bookRepository.findByIsbn(command.getIsbn())
+                .ifPresent(book -> book.updateAuthors(authorUpdateCommand));
     }
 }
