@@ -55,4 +55,35 @@
     <entry key="delete-book-relationship-with-authors">
         delete from book_authors where book_isbn = :book_isbn
     </entry>
+    <entry key="count-all-books">
+        select count(*) from books
+    </entry>
+    <entry key="query-book-projections-without-sorting">
+        select b.isbn as book_isbn, b.title as book_title, a.author_id, a.author_name
+        from
+            books b left join
+            book_authors ba on b.isbn = ba.book_isbn inner join
+            authors a on ba.author_id = a.author_id
+        limit :size
+        offset :offset
+    </entry>
+    <entry key="query-book-projections-sorting">
+        select b.isbn as book_isbn, b.title as book_title, a.author_id, a.author_name
+        from
+            books b left join
+            book_authors ba on b.isbn = ba.book_isbn inner join
+            authors a on ba.author_id = a.author_id
+        order by %s %s
+        limit :size
+        offset :offset
+    </entry>
+    <entry key="query-book-projection">
+        select b.isbn, b.title, a.author_id, a.author_name
+        from
+            books b left join
+            book_authors ba on b.isbn = ba.isbn inner join
+            authors a on ba.author_id = a.author_id
+        where
+            b.isbn = :book_isbn
+    </entry>
 </properties>

@@ -2,6 +2,7 @@ package io.github.agomezlucena.libtory.books;
 
 import io.github.agomezlucena.libtory.books.domain.AuthorChecker;
 import io.github.agomezlucena.libtory.books.infrastructure.database.AuthorSqlChecker;
+import io.github.agomezlucena.libtory.books.infrastructure.database.BookProjectionSqlRepository;
 import io.github.agomezlucena.libtory.books.infrastructure.database.BookQueries;
 import io.github.agomezlucena.libtory.books.infrastructure.database.BookSqlRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -52,6 +53,14 @@ public class ItTestSpringConfig {
             @Qualifier("bookJdbcOperations") NamedParameterJdbcOperations jdbcOperations
     ) {
         return new BookSqlRepository(queries, jdbcOperations);
+    }
+
+    @Bean
+    BookProjectionSqlRepository bookProjectionSqlRepository(
+            BookQueries queries,
+            @Qualifier("bookJdbcOperations") NamedParameterJdbcOperations jdbcOperations
+    ) {
+        return new BookProjectionSqlRepository(queries, jdbcOperations);
     }
 
     @Bean

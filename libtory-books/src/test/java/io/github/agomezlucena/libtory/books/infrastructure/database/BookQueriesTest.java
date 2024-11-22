@@ -47,6 +47,6 @@ class BookQueriesTest {
     @EnumSource(BookQueries.BookQueryName.class)
     void shouldReturnTheQueryFromBookSqlQueryName(final BookQueryName queryName) {
         var expectedValue = externalizedProperties.getProperty(queryName.queryName);
-        assertEquals(expectedValue,bookQueries.getQuery(queryName));
+        assertEquals(expectedValue.trim(),bookQueries.getQuery(queryName));
     }
 }
