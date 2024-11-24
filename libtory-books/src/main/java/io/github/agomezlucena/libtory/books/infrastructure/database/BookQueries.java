@@ -16,7 +16,7 @@ public class BookQueries {
     }
 
     public String getQuery(BookQueryName queryName) {
-        return queryProperties.getProperty(queryName.queryName);
+        return queryProperties.getProperty(queryName.queryName).trim();
     }
 
     public enum BookQueryName {
