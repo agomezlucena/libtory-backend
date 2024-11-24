@@ -4,6 +4,7 @@ mockitoVersion = "5.+"
 datafakerVersion = "2.+"
 junitVersion = "5.+"
 jspecifyVersion = "1.+"
+mybatisSpringStarterVersion = "3.+"
 
 [libraries]
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockitoVersion" }
@@ -11,6 +12,7 @@ datafaker = { module = "net.datafaker:datafaker", version.ref = "datafakerVersio
 junit = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junitVersion" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecifyVersion" }
 springBootBom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBootVersion" }
+mybatisStarter = { module = "org.mybatis.spring.boot:mybatis-spring-boot-starter", version.ref = "mybatisSpringStarterVersion"}
 
 [plugins]
 springBoot = { id = "org.springframework.boot", version.ref = "springBootVersion" }

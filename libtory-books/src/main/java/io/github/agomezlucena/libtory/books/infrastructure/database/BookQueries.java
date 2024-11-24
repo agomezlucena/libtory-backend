@@ -27,11 +27,7 @@ public class BookQueries {
         RELATE_BOOK_WITH_AUTHOR("relate-book-with-author"),
         DELETE_BOOK("delete-book"),
         DELETE_BOOK_RELATIONSHIP_WITH_AUTHORS("delete-book-relationship-with-authors"),
-        DERELATE_BOOK_WITH_NOT_GIVEN_AUTHORS("derelate-book-with-not-given-authors"),
-        COUNT_ALL_BOOKS("count-all-books"),
-        QUERY_BOOK_PROJECTIONS_WITHOUT_SORTING("query-book-projections-without-sorting"),
-        QUERY_BOOK_PROJECTIONS_SORTING("query-book-projections-sorting"),
-        QUERY_BOOK("query-book-projection");
+        DERELATE_BOOK_WITH_NOT_GIVEN_AUTHORS("derelate-book-with-not-given-authors");
 
         final String queryName;
 

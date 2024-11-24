@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.github.agomezlucena.libtory.books.infrastructure.database.mappers.BookProjectionMapper">
+    <resultMap id="AuthorResultMap" type="io.github.agomezlucena.libtory.books.domain.Author">
+        <constructor>
+            <arg name="authorId" column="author_id" javaType="java.util.UUID" typeHandler="io.github.agomezlucena.libtory.books.infrastructure.database.mappers.typehandlers.UUIDTypeHandler"/>
+            <arg name="name" column="author_name" javaType="String"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="BookProjectionResultMap" type="io.github.agomezlucena.libtory.books.domain.BookProjection">
+        <constructor>
+            <arg name="isbn" column="isbn" javaType="String"/>
+            <arg name="title" column="title" javaType="String"/>
+        </constructor>
+        <collection
+                property="authors"
+                ofType="io.github.agomezlucena.libtory.books.domain.Author"
+                resultMap="AuthorResultMap"
+        />
+    </resultMap>
+    
+    <sql id="sorting">
+        <choose>
+            <when test="sortingField = 'title'">
+                order by b.title
+                <include refid="sortingDirection"/>
+            </when>
+            <when test="sortingField = 'author_name'">
+                order by a.author_name
+                <include refid="sortingDirection"/>
+            </when>
+            <otherwise>
+                order by a.isbn
+                <include refid="sortingDirection"/>
+            </otherwise>
+        </choose>
+    </sql>
+
+    <sql id="sortingDirection">
+        <choose>
+            <when test="sortingDirection = 'ASC'">
+                ASC
+            </when>
+            <otherwise>
+                DESC
+            </otherwise>
+        </choose>
+    </sql>
+
+    <sql id="selectBookProjection">
+        select b.isbn, b.title, a.author_id,a.author_name
+        from books.books b left join
+             books.book_authors ba on b.isbn = ba.book_isbn left join
+             books.authors a on ba.author_id = a.author_id
+    </sql>
+
+    <select id="getAllBooks"
+            statementType="PREPARED"
+            parameterType="io.github.agomezlucena.libtory.shared.queries.PagedQuery"
+            resultMap="BookProjectionResultMap"
+    >
+        <include refid="selectBookProjection"/>
+        <if test="sortingField != null">
+            <include refid="sorting"/>
+        </if>
+        limit #{size} offset #{page} * #{size}
+    </select>
+
+    <select id="countAllBooks">
+        select count(*)
+        from books.books b
+    </select>
+
+    <select id="findByIsbn" resultMap="BookProjectionResultMap" statementType="PREPARED">
+        <include refid="selectBookProjection"/>
+        where b.isbn = #{isbn}
+    </select>
+</mapper>

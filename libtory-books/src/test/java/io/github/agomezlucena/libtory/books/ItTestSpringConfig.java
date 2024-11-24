@@ -2,9 +2,10 @@ package io.github.agomezlucena.libtory.books;
 
 import io.github.agomezlucena.libtory.books.domain.AuthorChecker;
 import io.github.agomezlucena.libtory.books.infrastructure.database.AuthorSqlChecker;
-import io.github.agomezlucena.libtory.books.infrastructure.database.BookProjectionSqlRepository;
+import io.github.agomezlucena.libtory.books.infrastructure.database.BookProjectionMyBatisRepository;
 import io.github.agomezlucena.libtory.books.infrastructure.database.BookQueries;
 import io.github.agomezlucena.libtory.books.infrastructure.database.BookSqlRepository;
+import io.github.agomezlucena.libtory.books.infrastructure.database.mappers.BookProjectionMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -29,9 +30,7 @@ public class ItTestSpringConfig {
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgresContainer() {
-        return new PostgreSQLContainer<>(
-                DockerImageName.parse("postgres:latest")
-        );
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
     }
 
     @Bean
@@ -56,11 +55,8 @@ public class ItTestSpringConfig {
     }
 
     @Bean
-    BookProjectionSqlRepository bookProjectionSqlRepository(
-            BookQueries queries,
-            @Qualifier("bookJdbcOperations") NamedParameterJdbcOperations jdbcOperations
-    ) {
-        return new BookProjectionSqlRepository(queries, jdbcOperations);
+    BookProjectionMyBatisRepository bookProjectionSqlRepository(BookProjectionMapper mapper) {
+        return new BookProjectionMyBatisRepository(mapper);
     }
 
     @Bean

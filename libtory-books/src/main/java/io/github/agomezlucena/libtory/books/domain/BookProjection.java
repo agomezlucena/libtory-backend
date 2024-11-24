@@ -1,10 +1,14 @@
 package io.github.agomezlucena.libtory.books.domain;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public record BookProjection(
         String isbn,
         String title,
-        Set<Author> authors
-) {
+        List<Author> authors
+){
+    public BookProjection(String isbn, String title) {
+        this(isbn, title, new ArrayList<>());
+    }
 }
