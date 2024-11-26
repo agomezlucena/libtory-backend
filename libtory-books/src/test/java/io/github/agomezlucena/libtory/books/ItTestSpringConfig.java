@@ -1,12 +1,15 @@
 package io.github.agomezlucena.libtory.books;
 
+import io.github.agomezlucena.libtory.books.application.QueryBooksPaginatedUseCase;
 import io.github.agomezlucena.libtory.books.domain.AuthorChecker;
+import io.github.agomezlucena.libtory.books.domain.BookProjectionRepository;
 import io.github.agomezlucena.libtory.books.infrastructure.database.AuthorSqlChecker;
-import io.github.agomezlucena.libtory.books.infrastructure.database.BookProjectionMyBatisRepository;
+import io.github.agomezlucena.libtory.books.infrastructure.database.BookProjectionMybatisRepository;
 import io.github.agomezlucena.libtory.books.infrastructure.database.BookQueries;
 import io.github.agomezlucena.libtory.books.infrastructure.database.BookSqlRepository;
 import io.github.agomezlucena.libtory.books.infrastructure.database.mappers.BookProjectionMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -55,8 +58,8 @@ public class ItTestSpringConfig {
     }
 
     @Bean
-    BookProjectionMyBatisRepository bookProjectionSqlRepository(BookProjectionMapper mapper) {
-        return new BookProjectionMyBatisRepository(mapper);
+    BookProjectionMybatisRepository bookProjectionSqlRepository(BookProjectionMapper mapper) {
+        return new BookProjectionMybatisRepository(mapper);
     }
 
     @Bean
@@ -67,10 +70,22 @@ public class ItTestSpringConfig {
         return new AuthorSqlChecker(queries,jdbcOperations);
     }
 
+    @Bean
+    QueryBooksPaginatedUseCase queryBooksPaginatedUseCase(BookProjectionRepository mapper){
+        return new QueryBooksPaginatedUseCase(mapper);
+    }
+
     @DynamicPropertySource
     static void registerDatasource(DynamicPropertyRegistry registry, PostgreSQLContainer<?> container) {
         registry.add("spring.datasource.url", container::getJdbcUrl);
         registry.add("spring.datasource.username", container::getUsername);
         registry.add("spring.datasource.password", container::getPassword);
+    }
+
+    @Bean
+    CommandLineRunner runner(){
+        return args -> {
+            org.apache.ibatis.logging.LogFactory.useSlf4jLogging();
+        };
     }
 }

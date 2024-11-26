@@ -9,7 +9,7 @@ import java.util.List;
 
 @Mapper
 public interface BookProjectionMapper {
-    List<BookProjection> getAllBooks(PagedQuery pagedQuery);
+    List<BookProjection> getAllBooks(PagedQuery<BookProjection> pagedQuery);
     int countAllBooks();
     BookProjection findByIsbn(@Param("isbn") String isbn);
 }

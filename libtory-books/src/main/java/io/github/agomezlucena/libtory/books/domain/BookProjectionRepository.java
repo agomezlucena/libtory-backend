@@ -6,6 +6,6 @@ import io.github.agomezlucena.libtory.shared.queries.PagedResult;
 import java.util.Optional;
 
 public interface BookProjectionRepository {
-    PagedResult<BookProjection> findAllProjections(PagedQuery query);
+    PagedResult<BookProjection> findAllProjections(PagedQuery<BookProjection> query);
     Optional<BookProjection> findProjectionByIsbn(Isbn isbn);
 }

@@ -1,11 +1,8 @@
 package io.github.agomezlucena.libtory.books.infrastructure.database;
 
-import io.github.agomezlucena.libtory.books.domain.Author;
-import io.github.agomezlucena.libtory.books.domain.BookProjection;
 import io.github.agomezlucena.libtory.books.domain.Isbn;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension;
 import io.github.agomezlucena.libtory.shared.FakerIsbn;
-import io.github.agomezlucena.libtory.shared.queries.PagedQuery;
 import io.github.agomezlucena.libtory.shared.queries.PagedResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,19 +14,19 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
+import static io.github.agomezlucena.libtory.books.testutils.BookProjectionFactory.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("BookProjectionSqlRepository should do in database")
 @ExtendWith(DataFakerExtension.class)
 @SpringBootTest
-public class BookProjectionMyBatisRepositoryItTest {
+public class BookProjectionMybatisRepositoryItTest {
     @Autowired
     private NamedParameterJdbcOperations namedParameterJdbcOperations;
     @Autowired
-    private BookProjectionMyBatisRepository bookProjectionMyBatisRepository;
+    private BookProjectionMybatisRepository bookProjectionMyBatisRepository;
 
     @BeforeEach
     public void setUpBooksAndAuthorsInDatabase() {
@@ -72,71 +69,31 @@ public class BookProjectionMyBatisRepositoryItTest {
     @Test
     @DisplayName("query all the books and return the expected books")
     void queryAllBooksAndReturnExpectedBooks() {
-        var expectedBooks = new PagedResult<>(
-            List.of(
-                new BookProjection(
-                        "9781914602108",
-                        "The Iliad",
-                        List.of(
-                                new Author(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"),"Homer")
-                        )
-                )
-            ),
-                1,
-                3,
-                null,
-                null
-        );
+        var expectedBooks = new PagedResult<>(List.of(createTheIliad()), 1, 3, null, null);
 
-        var obtainedValue = bookProjectionMyBatisRepository.findAllProjections(new PagedQuery(0,1,null,null));
-        assertEquals(expectedBooks,obtainedValue);
+        var givenQuery = new BookProjectionPaginatedQuery(0, 1, null, null);
+        var obtainedValue = bookProjectionMyBatisRepository.findAllProjections(givenQuery);
+        assertEquals(expectedBooks, obtainedValue);
     }
 
     @Test
     @DisplayName("should return the expected value ordered by the selected field")
-    void shouldReturnTheExpectedValueOrderedByTheSelectedField(){
-        var expectedBooks = new PagedResult<>(
-                List.of(
-                        new BookProjection(
-                                "9780785839996",
-                                "The Great Gatsby",
-                                List.of(
-                                        new Author(UUID.fromString("123e4567-e89b-12d3-a456-426614174001"),"F. Scott Fitzgerald")
-                                )
-                        )
-                ),
-                1,
-                3,
-                "title",
-                "ASC"
-        );
+    void shouldReturnTheExpectedValueOrderedByTheSelectedField() {
+        var expectedBooks = new PagedResult<>(List.of(createTheGreatGatsby()), 1, 3, "title", "ASC");
 
-        var givenPageRequest = new PagedQuery(0,1,"title","ASC");
+        var givenPageRequest = new BookProjectionPaginatedQuery(0, 1, "title", "ASC");
         var obtainedValue = bookProjectionMyBatisRepository.findAllProjections(givenPageRequest);
-        assertEquals(expectedBooks,obtainedValue);
+        assertEquals(expectedBooks, obtainedValue);
     }
 
     @Test
     @DisplayName("should return an optional with the expected value when is found")
     void shouldReturnTheExpectedValueWhenIsFound() {
-        var expectedValue = Optional.of(
-                new BookProjection(
-                        "9780201616224",
-                        "The Pragmatic Programmer: From Journeyman to Master",
-                        List.of(
-                                new Author(
-                                        UUID.fromString("123e4567-e89b-12d3-a456-426614174002"),
-                                        "Andrew Hunt"
-                                ),
-                                new Author(
-                                        UUID.fromString("123e4567-e89b-12d3-a456-426614174003"),
-                                        "David Thomas"
-                                )
-                        )
-                )
-        );
-        var obtainedValue = bookProjectionMyBatisRepository.findProjectionByIsbn(Isbn.fromString("9780201616224"));
-        assertEquals(expectedValue,obtainedValue);
+        var expectedValue = Optional.of(createThePragmaticProgrammer());
+
+        var givenIsbn = Isbn.fromString("9780201616224");
+        var obtainedValue = bookProjectionMyBatisRepository.findProjectionByIsbn(givenIsbn);
+        assertEquals(expectedValue, obtainedValue);
     }
 
     @Test
@@ -144,8 +101,10 @@ public class BookProjectionMyBatisRepositoryItTest {
     void shouldReturnAEmptyOptionalWhenNoValueIsFound(
             @FakerIsbn(avoidIsbn = "9780201616224,9780785839996,9781914602108") String generatedIsbn
     ) {
-        var obtainedValue = bookProjectionMyBatisRepository.findProjectionByIsbn(Isbn.fromString(generatedIsbn));
+        var givenIsbn = Isbn.fromString(generatedIsbn);
+        var obtainedValue = bookProjectionMyBatisRepository.findProjectionByIsbn(givenIsbn);
         assertTrue(obtainedValue.isEmpty());
     }
+
 
 }
