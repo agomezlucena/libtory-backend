@@ -1,21 +1,21 @@
 package io.github.agomezlucena.libtory.books;
 
 import io.github.agomezlucena.libtory.books.application.QueryBooksPaginatedUseCase;
+import io.github.agomezlucena.libtory.books.application.UpdateBookUseCase;
 import io.github.agomezlucena.libtory.books.domain.AuthorChecker;
 import io.github.agomezlucena.libtory.books.domain.BookProjectionRepository;
+import io.github.agomezlucena.libtory.books.domain.BookRepository;
 import io.github.agomezlucena.libtory.books.infrastructure.database.AuthorSqlChecker;
 import io.github.agomezlucena.libtory.books.infrastructure.database.BookProjectionMybatisRepository;
 import io.github.agomezlucena.libtory.books.infrastructure.database.BookQueries;
 import io.github.agomezlucena.libtory.books.infrastructure.database.BookSqlRepository;
 import io.github.agomezlucena.libtory.books.infrastructure.database.mappers.BookProjectionMapper;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -42,17 +42,9 @@ public class ItTestSpringConfig {
     }
 
     @Bean
-    @Qualifier("bookJdbcOperations")
-    NamedParameterJdbcOperations namedParameterJdbcOperations(DataSource dataSource) {
-        var jdbcOperations = new NamedParameterJdbcTemplate(dataSource);
-        jdbcOperations.getJdbcOperations().execute("set search_path to books");
-        return jdbcOperations;
-    }
-
-    @Bean
     BookSqlRepository bookSqlRepository(
             BookQueries queries,
-            @Qualifier("bookJdbcOperations") NamedParameterJdbcOperations jdbcOperations
+            NamedParameterJdbcOperations jdbcOperations
     ) {
         return new BookSqlRepository(queries, jdbcOperations);
     }
@@ -65,7 +57,7 @@ public class ItTestSpringConfig {
     @Bean
     AuthorChecker authorChecker(
             BookQueries queries,
-            @Qualifier("bookJdbcOperations")NamedParameterJdbcOperations jdbcOperations
+            NamedParameterJdbcOperations jdbcOperations
     ){
         return new AuthorSqlChecker(queries,jdbcOperations);
     }
@@ -73,6 +65,11 @@ public class ItTestSpringConfig {
     @Bean
     QueryBooksPaginatedUseCase queryBooksPaginatedUseCase(BookProjectionRepository mapper){
         return new QueryBooksPaginatedUseCase(mapper);
+    }
+
+    @Bean
+    UpdateBookUseCase updateBookUseCase(BookRepository repository, AuthorChecker authorChecker) {
+        return new UpdateBookUseCase(repository, authorChecker);
     }
 
     @DynamicPropertySource

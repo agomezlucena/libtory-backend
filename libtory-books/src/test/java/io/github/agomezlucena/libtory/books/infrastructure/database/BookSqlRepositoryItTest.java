@@ -7,9 +7,7 @@ import io.github.agomezlucena.libtory.books.domain.Isbn;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension.FakerBookTitle;
 import io.github.agomezlucena.libtory.shared.FakerIsbn;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static io.github.agomezlucena.libtory.books.testutils.BooksTestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("BookSqlRepository should do in database")
@@ -34,58 +33,19 @@ class BookSqlRepositoryItTest {
     @Autowired
     private AuthorChecker authorChecker;
 
-    @BeforeEach
-    public void setUpBooksAndAuthorsInDatabase() {
-        var insertBooksSql = """
-                INSERT INTO books.books (isbn, title)
-                VALUES
-                ('9781914602108', 'The Iliad'),
-                ('9780785839996', 'The Great Gatsby'),
-                ('9780201616224','The Pragmatic Programmer: From Journeyman to Master')
-                ON CONFLICT (isbn) do update
-                    set title = excluded.title
-                """;
-
-        var insertAuthorsSql = """
-                INSERT INTO books.authors (author_id, author_name)
-                VALUES
-                ('123e4567-e89b-12d3-a456-426614174000', 'Homer'),
-                ('123e4567-e89b-12d3-a456-426614174001', 'F. Scott Fitzgerald'),
-                ('123e4567-e89b-12d3-a456-426614174002', 'Andrew Hunt'),
-                ('123e4567-e89b-12d3-a456-426614174003', 'David Thomas')
-                on conflict do nothing
-                """;
-
-        var insertBookAuthorsSql = """
-                INSERT INTO books.book_authors (book_isbn, author_id)
-                VALUES
-                ('9781914602108', '123e4567-e89b-12d3-a456-426614174000'),
-                ('9780785839996', '123e4567-e89b-12d3-a456-426614174001'),
-                ('9780201616224','123e4567-e89b-12d3-a456-426614174002'),
-                ('9780201616224','123e4567-e89b-12d3-a456-426614174003')
-                on conflict do nothing
-                """;
-
-
-        namedParameterJdbcOperations.getJdbcOperations().execute(insertAuthorsSql);
-        namedParameterJdbcOperations.getJdbcOperations().execute(insertBooksSql);
-        namedParameterJdbcOperations.getJdbcOperations().execute(insertBookAuthorsSql);
+    @BeforeAll
+    public static void setUpTestSuite(@Autowired NamedParameterJdbcOperations operations) throws InterruptedException {
+        createTestData(operations);
     }
 
     @BeforeEach
     public void deletedNonFixedTestData() {
-        var deleteBookSql = """
-                delete from books.books
-                where isbn not in ('9781914602108','9780785839996','9780201616224')
-                """;
+       cleanupDatabase(namedParameterJdbcOperations);
+    }
 
-        var deleteAuthorRelationShip = """
-                delete from books.book_authors
-                where book_isbn not in ('9781914602108','9780785839996','9780201616224')
-                """;
-
-        namedParameterJdbcOperations.getJdbcOperations().execute(deleteAuthorRelationShip);
-        namedParameterJdbcOperations.getJdbcOperations().execute(deleteBookSql);
+    @AfterAll
+    public static void cleanData(@Autowired NamedParameterJdbcOperations operations) throws InterruptedException {
+        deleteAllRegisters(operations);
     }
 
     @Test
@@ -98,7 +58,7 @@ class BookSqlRepositoryItTest {
         var givenBook = Book.createBook(givenBookPrimitives, authorChecker);
 
         bookSqlRepository.save(givenBook);
-        var verificationQuery = "select count(*) = 1 from books where isbn = :isbn";
+        var verificationQuery = "select count(*) = 1 from books.books where isbn = :isbn";
 
         assertTrue(
                 Optional.ofNullable(
@@ -125,7 +85,7 @@ class BookSqlRepositoryItTest {
         givenBook.setTitle("another test title");
         bookSqlRepository.save(givenBook);
 
-        var verificationQuery = "select count(*) = 1 from books where isbn = :isbn and title = :title";
+        var verificationQuery = "select count(*) = 1 from books.books where isbn = :isbn and title = :title";
         var result = Optional.ofNullable(
                 namedParameterJdbcOperations.queryForObject(
                         verificationQuery,
@@ -155,7 +115,7 @@ class BookSqlRepositoryItTest {
 
         var givenBook = Book.createBook(givenBookPrimitives, authorChecker);
         bookSqlRepository.save(givenBook);
-        var verificationQuery = "select count(*) = 1 from book_authors where book_isbn = :isbn";
+        var verificationQuery = "select count(*) = 1 from books.book_authors where book_isbn = :isbn";
         var result = Optional.ofNullable(
                         namedParameterJdbcOperations.queryForObject(
                                 verificationQuery,
@@ -175,7 +135,7 @@ class BookSqlRepositoryItTest {
     )
     void mustDeleteNotPresentAuthorInDatabaseWhenIsNotPresentWhenSaving(){
         var preconditionQuery = """
-                insert into book_authors (book_isbn,author_id)
+                insert into books.book_authors (book_isbn,author_id)
                 values ('9781914602108','123e4567-e89b-12d3-a456-426614174001')
                 """;
         namedParameterJdbcOperations.update(preconditionQuery, Collections.emptyMap());
@@ -189,7 +149,7 @@ class BookSqlRepositoryItTest {
         var givenBook = Book.createBook(primitives, authorChecker);
         bookSqlRepository.save(givenBook);
 
-        var verificationQuery = "select count(*) = 1 from book_authors where book_isbn = '9781914602108'";
+        var verificationQuery = "select count(*) = 1 from books.book_authors where book_isbn = '9781914602108'";
 
         var result = Optional.ofNullable(
                         namedParameterJdbcOperations.queryForObject(
@@ -218,7 +178,7 @@ class BookSqlRepositoryItTest {
         var givenBook = Book.createBook(primitives, authorChecker);
         bookSqlRepository.save(givenBook);
 
-        var verificationQuery = "select count(*) = 0 from book_authors where book_isbn = '9781914602108'";
+        var verificationQuery = "select count(*) = 0 from books.book_authors where book_isbn = '9781914602108'";
 
         var result = Optional.ofNullable(
                         namedParameterJdbcOperations.queryForObject(
@@ -253,8 +213,8 @@ class BookSqlRepositoryItTest {
     void shouldRemoveExistingRecordsInBooksTableAndBookAuthorsWhenABookIsDeletedByIsbn(){
         bookSqlRepository.delete(Isbn.fromString("9780785839996"));
         var query = """
-                select ((select count(*) from book_authors where book_isbn = '9780785839996') +
-                       (select count(*) from books where isbn = '9780785839996')) = 0
+                select ((select count(*) from books.book_authors where book_isbn = '9780785839996') +
+                       (select count(*) from books.books where isbn = '9780785839996')) = 0
                 """;
         var result = namedParameterJdbcOperations.queryForObject(query, Collections.emptyMap(),Boolean.class);
         assertEquals(Boolean.TRUE, result);
