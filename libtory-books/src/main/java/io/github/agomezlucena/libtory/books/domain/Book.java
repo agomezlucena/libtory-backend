@@ -17,7 +17,7 @@ import static io.github.agomezlucena.libtory.books.domain.AuthorUpdateCommand.De
  */
 public class Book {
     private final Isbn isbn;
-    private Title title;
+    private final Title title;
     private AuthorsId authorsId;
 
     /**
@@ -51,16 +51,6 @@ public class Book {
 
     public @NonNull String getTitle() {
         return title.title();
-    }
-
-    /**
-     * Will set the title with the value passed by parameter.
-     *
-     * @param title a non null or not blank string
-     * @throws InvalidTitle when title is null or blank
-     */
-    public void setTitle(@NonNull String title) {
-        this.title = Title.fromText(title);
     }
 
     /**

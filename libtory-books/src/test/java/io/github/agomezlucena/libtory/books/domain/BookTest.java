@@ -51,23 +51,6 @@ class BookTest {
         assertEquals(givenTitle, obtainedBook.getTitle());
     }
 
-    @Test
-    @DisplayName("allow to modify the title")
-    void shouldAllowToModifyTheTitle(Faker faker) {
-        var originalTitle = faker.book().title();
-        var secondTitle = faker.book().title();
-        while (originalTitle.equals(secondTitle)){
-            secondTitle = faker.book().title();
-        }
-        var primitives = new BookPrimitives(faker.code().isbn13(), originalTitle);
-        var testSubject = Book.createBook(primitives,this.defaultAuthorChecker);
-
-        testSubject.setTitle(secondTitle);
-
-        var obtainedValue = testSubject.getTitle();
-        assertNotEquals(originalTitle, obtainedValue);
-        assertEquals(secondTitle, obtainedValue);
-    }
 
     @ParameterizedTest(name = "a string is considered empty if: {0}")
     @MethodSource("emptyTitles")
@@ -86,19 +69,6 @@ class BookTest {
         ).getMessage();
 
         assertEquals(expectedMessage, result);
-    }
-
-    @ParameterizedTest(name = "a string is considered empty if: {0}")
-    @MethodSource("emptyTitles")
-    @DisplayName("not allow to modify a book title with an empty one")
-    void shouldNotAllowToModifyABookTitleWithAnEmptyOne(
-            @SuppressWarnings("unused") String emptyRule,
-            String title,
-            Faker faker
-    ) {
-        var primitives = new BookPrimitives(faker.code().isbn13(), faker.book().title());
-        var testSubject = Book.createBook(primitives,this.defaultAuthorChecker);
-        assertThrows(InvalidTitle.class, () -> testSubject.setTitle(title));
     }
 
     @Test

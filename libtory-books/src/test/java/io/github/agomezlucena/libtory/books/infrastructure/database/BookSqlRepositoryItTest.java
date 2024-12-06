@@ -78,18 +78,16 @@ class BookSqlRepositoryItTest {
             @FakerIsbn(avoidIsbn = "9781914602108;9780785839996;9780201616224") String isbn,
             @FakerBookTitle String title
     ) {
-        var givenBookPrimitives = new BookPrimitives(isbn, title);
-        var givenBook = Book.createBook(givenBookPrimitives, authorChecker);
-
+        var givenBook = new BookPrimitives(isbn, title).toBook();
+        var givenUpdatedBook = new BookPrimitives(isbn, "another title different to: "+title).toBook();
         bookSqlRepository.save(givenBook);
-        givenBook.setTitle("another test title");
-        bookSqlRepository.save(givenBook);
+        bookSqlRepository.save(givenUpdatedBook);
 
         var verificationQuery = "select count(*) = 1 from books.books where isbn = :isbn and title = :title";
         var result = Optional.ofNullable(
                 namedParameterJdbcOperations.queryForObject(
                         verificationQuery,
-                        Map.of("isbn", isbn, "title", givenBook.getTitle()),
+                        Map.of("isbn", isbn, "title", givenUpdatedBook.getTitle()),
                         Boolean.class
                 ))
                 .orElse(false);
