@@ -1,4 +1,4 @@
-package io.github.agomezlucena.libtory.books.infrastructure.database;
+package io.github.agomezlucena.libtory.books.application;
 
 import io.github.agomezlucena.libtory.books.domain.BookProjection;
 import io.github.agomezlucena.libtory.shared.queries.AbstractPagedQuery;

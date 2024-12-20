@@ -1,6 +1,5 @@
 package io.github.agomezlucena.libtory.books.application;
 
-import io.github.agomezlucena.libtory.books.infrastructure.database.BookProjectionPaginatedQuery;
 import io.github.agomezlucena.libtory.shared.queries.InvalidQuery;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
