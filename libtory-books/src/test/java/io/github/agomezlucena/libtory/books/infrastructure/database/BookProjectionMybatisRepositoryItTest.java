@@ -1,5 +1,6 @@
 package io.github.agomezlucena.libtory.books.infrastructure.database;
 
+import io.github.agomezlucena.libtory.books.application.BookProjectionPaginatedQuery;
 import io.github.agomezlucena.libtory.books.domain.Isbn;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension;
 import io.github.agomezlucena.libtory.shared.FakerIsbn;
