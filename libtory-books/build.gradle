@@ -28,6 +28,7 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
 
     testImplementation testFixtures(project(":libtory-shared"))
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
