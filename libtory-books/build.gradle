@@ -9,14 +9,15 @@ version = '1.0-SNAPSHOT'
 repositories {
     mavenCentral()
 }
+
+configurations {
+    mockitoAgent
+}
+
 bootJar{
     enabled=false
 }
 
-test {
-    useJUnitPlatform()
-    forkEvery 2
-}
 
 dependencies {
     implementation platform (libs.springBootBom)
@@ -34,4 +35,14 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.liquibase:liquibase-core'
     testImplementation 'org.testcontainers:postgresql'
+    testImplementation (libs.mockito)
+    mockitoAgent(libs.mockito) {
+        transitive = false
+    }
+}
+
+test {
+    jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
+    useJUnitPlatform()
+    forkEvery 2
 }
