@@ -1,0 +1,470 @@
+openapi: 3.0.0
+info:
+  title: libtory
+  description: libtory is a rest service for libraries that allows to libraries to manage their inventory.
+  version: 1.0.0
+servers:
+  - url: 'https://dev.libtory.com/api/v1/'
+    description: dev environment for testing the api.
+  - url: 'https://prod.libtory.com/api/v1/'
+    description: production environment
+
+components:
+
+  schemas:
+    PagedResult:
+      type: object
+      required:
+        - items
+        - size
+        - totalAmount
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LibtoryEntity'
+        size:
+          type: integer
+          format: int32
+        totalAmount:
+          type: integer
+          format: int32
+        sortingField:
+          type: string
+        sortingDirection:
+          type: string
+          enum:
+            - "ASC"
+            - "DESC"
+
+
+    Property:
+      type: object
+      properties:
+        field:
+          type: string
+        value:
+          type: object
+
+    LibtoryEntity:
+      description: "it's a generic wrapper that manages the relation between aggregates"
+      type: object
+      required:
+        - id
+        - type
+      properties:
+        id:
+          description: "represent the identifier of the retrieved entity"
+          type: string
+        type:
+          description: "represent the type of entity"
+          type: string
+          enum: [ Book,Author ]
+        url:
+          description: "is the url for working with that entity"
+          type: string
+          format: uri
+        properties:
+          description: "this array represent all the fields with it's corresponding values of the entity"
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+        relatedEntities:
+          description: "this array represent the related entities to the retrieved one by instance the author of a book
+          ideally should be only one level of depth."
+          type: array
+          items:
+            $ref: '#/components/schemas/LibtoryEntity'
+
+    LibtoryError:
+      description: "an object that represent an error"
+      type: object
+      required:
+        - transactionId
+        - code
+        - message
+      properties:
+        transactionId:
+          description: "represent the transaction id that failed to execute"
+          type: string
+          format: uuid
+        code:
+          description: "represent the kind of error that we are facing"
+          type: string
+          enum:
+            - CLIENT_ERROR
+            - ENTITY_NOT_FOUND_ERROR
+            - SERVER_ERROR
+        message:
+          description: "represent the error message in plain english"
+          type: string
+        localizedMessage:
+          description: "represent the error message in the language of the user if we don't have it will be null"
+          type: string
+          nullable: true
+
+paths:
+  /books:
+    get:
+      description: "allows you to query in a paginated way a list of books"
+      tags:
+        - query
+        - books
+      parameters:
+        - name: X-Transaction-Id
+          description: "define the transaction id can be omitted in that case the service will generate a new one
+          the main usage for this header is to simplify the debugging in case of failure"
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: size
+          in: query
+          description: "define the amount of objects to obtain in a page, if not defined will take the value as 10"
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+        - name: page
+          in: query
+          description: "define the actual page that you are searching for, if not defined will take the value as 0"
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+
+        - name: sortingField
+          in: query
+          description: "allows to sort by one of the defined fields is totally optional"
+          schema:
+            type: string
+            enum:
+              - isbn
+              - title
+              - author_name
+
+        - name: sortingDirection
+          in: query
+          description: "allows to select the sorting direction"
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+      responses:
+        200:
+          description: the query of books was successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedResult'
+              examples:
+                Unsorted response:
+                  description: unsorted book query result
+                  value:
+                    items:
+                      - id: "9781914602108"
+                        type: "Book"
+                        url: "/api/v1/books/9781914602108"
+                        properties:
+                          - field: "title"
+                            value: "The Iliad."
+                        relatedEntities:
+                          - id: '123e4567-e89b-12d3-a456-426614174000'
+                            type: "Author"
+                            url: "/api/v1/authors/123e4567-e89b-12d3-a456-426614174000"
+                            properties:
+                              - field: "name"
+                                value: "Homer"
+                    size: 1
+                    totalAmount: 10
+                    sortingField: null
+                    sortingDirection: null
+                Sorted Response:
+                  description: sorted by book title.
+                  value:
+                    items:
+                      - id: "9780785839996"
+                        type: "Book"
+                        url: "/api/v1/books/9780785839996"
+                        properties:
+                          - field: "title"
+                            value: "The Great Gatsby"
+                        relatedEntities:
+                          - id: '123e4567-e89b-12d3-a456-426614174001'
+                            type: "Author"
+                            url: "/api/v1/authors/123e4567-e89b-12d3-a456-426614174001"
+                            properties:
+                              - field: "name"
+                                value: "F. Scott Fitzgerald"
+
+                      - id: "9781914602108"
+                        type: "Book"
+                        url: "/api/v1/books/9781914602108"
+                        properties:
+                          - field: "title"
+                            value: "The Iliad."
+                        relatedEntities:
+                          - id: '123e4567-e89b-12d3-a456-426614174000'
+                            type: "Author"
+                            url: "/api/v1/authors/123e4567-e89b-12d3-a456-426614174000"
+                            properties:
+                              - field: "name"
+                                value: "Homer"
+
+                    size: 2
+                    totalAmount: 10
+                    sortingField: "title"
+                    sortingDirection: 'ASC'
+        400:
+          description: "when the user send a invalid parameter"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibtoryError'
+              examples:
+                Invalid page error:
+                  description: 'error caused when the user sent a page lesser than zero this error will not apply when
+                  no parameter is sent because the back-end will'
+                  value:
+                    transactionId: '30e437ad-c7f2-421a-a2b6-c6f4f5f0d428'
+                    code: 'CLIENT_ERROR'
+                    message: 'invalid paginated query page should be at least 0'
+
+                Invalid size error:
+                  description: 'error caused when the user sent a size lesser than one this error will not apply when
+                  no parameter is sent'
+                  value:
+                    transactionId: '30e437ad-c7f2-421a-a2c6-c6f4f5f0d428'
+                    code: 'CLIENT_ERROR'
+                    message: 'Invalid paginated query size should be at least 1'
+
+                Set sorting direction without sorting field:
+                  description: 'error caused by defining a sorting direction without define the sorting field'
+                  value:
+                    transactionId: '30e437ad-d7f2-421a-a2c6-c6f4f5f0d428'
+                    code: 'CLIENT_ERROR'
+                    message: 'invalid paginated query sorting field is required when sorting direction is defined'
+
+                Invalid sorting field:
+                  description: 'error caused when the user try to use a field different to isbn, title or author_name 
+                  for sorting the result'
+                  value:
+                    transactionId: '31e437ad-d7f2-421a-a2c6-c6f4f5f0d428'
+                    code: 'CLIENT_ERROR'
+                    message: 'field direction is not valid for this query'
+
+                Invalid sorting direction:
+                  description: 'error caused when the user try use a different value to ASC or DESC when define
+                  the sorting direction'
+                  value:
+                    transactionId: '31e437ad-d7a2-421a-a2c6-c6f4f5f0d428'
+                    code: 'CLIENT_ERROR'
+                    message: 'invalid paginated query the given sorting direction is invalid'
+        500:
+          description: "when an unexpected error happens in the back end"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibtoryError'
+              example:
+                transactionId: '30e137ad-c7f2-421a-a2b6-c6f4f5f0d428'
+                code: 'SERVER_ERROR'
+                message: 'An unknown error occurred.'
+
+  /books/{isbn}:
+    get:
+      description: "allows you to query a book by isbn 13 will cause a 400 error if you pass an invalid isbn"
+      tags:
+        - query
+        - books
+      parameters:
+        - name: X-Transaction-Id
+          description: "define the transaction id can be omitted in that case the service will generate a new one
+          the main usage for this header is to simplify the debugging in case of failure"
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+
+        - name: isbn
+          description: 'isbn 13 of the book that you are searching'
+          in: path
+          required: true
+          schema:
+            type: string
+          examples:
+            isbn with hyphens:
+              value: "978-8431680251"
+            isbn without hyphens:
+              value: "9788467585025"
+      responses:
+        200:
+          description: 'will return an entity that contains the information of the queried book'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibtoryEntity'
+              examples:
+                book with authors:
+                  value:
+                    id: "9780785839996"
+                    type: "Book"
+                    url: "/api/v1/books/9780785839996"
+                    properties:
+                      - field: "title"
+                        value: "The Great Gatsby"
+                      - field: "synopsis"
+                        value: "The Great Gatsby by F. Scott Fitzgerald is set in the 1920s and follows Jay Gatsby, 
+                        a mysterious millionaire obsessed with rekindling his romance with Daisy Buchanan, his former 
+                        love now married to Tom Buchanan. Narrated by Nick Carraway, Gatsby’s neighbor, the novel 
+                        explores the extravagance of the upper class, the emptiness behind wealth, and the corruption of
+                        the American Dream. Gatsby throws lavish parties hoping to win Daisy back, but his love proves 
+                        unattainable. The story ends in tragedy, highlighting the fragility of dreams and human 
+                        illusions in a world of materialism and moral decay."
+                      - field: "totalCopies"
+                        value: 10
+                      - field: "availableCopies"
+                        value: 3
+                    relatedEntities:
+                      - id: '123e4567-e89b-12d3-a456-426614174001'
+                        type: "Author"
+                        url: "/api/v1/authors/123e4567-e89b-12d3-a456-426614174001"
+                        properties:
+                          - field: "name"
+                            value: "F. Scott Fitzgerald"
+
+                book without authors:
+                  value:
+                    id: "9788435902588"
+                    type: "Book"
+                    url: "/api/v1/books/9788435902588"
+                    properties:
+                      - field: "title"
+                        value: "The song of my Cid"
+                      - field: "synopsis"
+                        value: "The Song of My Cid is an epic poem from medieval Spain recounting the adventures of 
+                        Rodrigo Díaz de Vivar, known as El Cid. Exiled by King Alfonso VI due to false accusations, 
+                        El Cid embarks on a journey to restore his honor. With loyalty, strategic brilliance, 
+                        and military prowess, he conquers Valencia and earns immense wealth and respect. His victories 
+                        lead to reconciliation with the king and advantageous marriages for his daughters. Despite 
+                        political intrigue and betrayal, El Cid’s unwavering sense of justice and honor define his 
+                        legacy. The poem celebrates loyalty, chivalry, and the enduring quest for personal redemption."
+                      - field: "totalCopies"
+                        value: 20
+                      - field: "availableCopies"
+                        value: 10
+        400:
+          description: 'this error is caused when the user send a invalid isbn, by instance a bad formed one'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibtoryError'
+              example:
+                transactionId: 'da21bd8a-296b-4084-83dd-e66748677604'
+                code: "CLIENT_ERROR"
+                message: "the given isbn is invalid."
+        404:
+          description: "this error is caused when the user pass a valid isbn but we don't have the book"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibtoryError'
+              example:
+                transactionId: '26b7e332-a03a-4545-b326-d0a24e6f2ed3'
+                code: 'ENTITY_NOT_FOUND_ERROR'
+                message: "the given isbn is not associated to any book in our library."
+        500:
+          description: "when an unexpected error happens in the back end"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibtoryError'
+              example:
+                transactionId: '30e137ad-c7f2-421a-a2b6-c6f4f5f0d428'
+                code: 'SERVER_ERROR'
+                message: 'An unknown error occurred.'
+    put:
+      description: |
+        # Book creation and update operation:
+        the goal is to provide a idempotent way of creating or updating a book.
+        ## expected properties:
+          - **title**: a string that represent the title of the book
+          - **sypnosis**: a short text that represent a little resume of not more than 100 words of the book
+        ## expected related entities:
+          - **Author**: you will only need to put the id of the authors and the type.
+        
+        The operation will fail if you add more data than the expected and will give you an 400 error.
+      tags:
+        - books
+        - creation
+        - update
+      parameters:
+        - name: isbn
+          description: 'isbn 13 of the book that you are searching'
+          in: path
+          required: true
+          schema:
+            type: string
+          examples:
+            isbn with hyphens:
+              value: "978-8431680251"
+            isbn without hyphens:
+              value: "9788467585025"
+        - name: X-Transaction-Id
+          description: "define the transaction id can be omitted in that case the service will generate a new one
+          the main usage for this header is to simplify the debugging in case of failure"
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: "payload that allows you to create or update a new book"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LibtoryEntity'
+            examples:
+              book with authors:
+                value:
+                  id: "9781914602108"
+                  type: "Book"
+                  properties:
+                    - field: "title"
+                      value: "The Iliad."
+                    - field: "synopsis"
+                      value: "The Iliad by Homer is an epic poem set during the Trojan War, focusing on the wrath of the
+                       Greek hero Achilles. The story begins with a quarrel between Achilles and King Agamemnon over a 
+                       war prize, causing Achilles to withdraw from battle. The Greeks suffer without him, and his close
+                        friend Patroclus is killed by Hector, Trojan prince. Consumed by grief and rage, Achilles 
+                        returns to the battlefield, slays Hector, and desecrates his body. Eventually, Achilles shows 
+                        compassion, returning Hector's body to his father, King Priam. The epic explores themes of 
+                        honor, revenge, fate, and the human cost of war."
+                  relatedEntities:
+                    - id: '123e4567-e89b-12d3-a456-426614174000'
+                      type: "Author"
+              book without authors:
+                value:
+                  id: "9788435902588"
+                  type: "Book"
+                  properties:
+                    - field: "title"
+                      value: "The song of my Cid"
+                    - field: "synopsis"
+                      value: "The Song of My Cid is an epic poem from medieval Spain recounting the adventures of 
+                      Rodrigo Díaz de Vivar, known as El Cid. Exiled by King Alfonso VI due to false accusations, 
+                      El Cid embarks on a journey to restore his honor. With loyalty, strategic brilliance, 
+                      and military prowess, he conquers Valencia and earns immense wealth and respect. His victories 
+                      lead to reconciliation with the king and advantageous marriages for his daughters. Despite 
+                      political intrigue and betrayal, El Cid’s unwavering sense of justice and honor define his 
+                      legacy. The poem celebrates loyalty, chivalry, and the enduring quest for personal redemption."
+      responses:
+        200:
+          description: "the book was correctly updated or created and the response will be an empty one"
+        400:
+          description: "this error can happen in two cases you pass an invalid isbn or you pass more properties than
+          expected"

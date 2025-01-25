@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     alias(libs.plugins.springBoot) apply(true)
+    alias(libs.plugins.openapi) apply(true)
 }
 
 
@@ -16,6 +17,8 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter"
     implementation "org.springframework.boot:spring-boot-starter-web"
     implementation "org.springframework.boot:spring-boot-starter-jdbc"
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0"
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
     implementation 'org.postgresql:postgresql'
     testImplementation "org.springframework.boot:spring-boot-starter-test"
 
@@ -26,6 +29,27 @@ test {
     useJUnitPlatform()
 }
 
+sourceSets.main.java.srcDirs += "${layout.buildDirectory.get()}/generated/src/main/java"
+compileJava.dependsOn tasks.openApiGenerate
+
 bootJar {
     enabled=true
+}
+
+openApiValidate {
+    inputSpec.set("${projectDir}/src/main/resources/libtory-rest-api.yaml")
+}
+
+openApiGenerate {
+    generatorName = "spring"
+    inputSpec = "${projectDir}/src/main/resources/libtory-rest-api.yaml"
+    outputDir = "${layout.buildDirectory.get()}/generated"
+    apiPackage = "io.github.agomezlucena.libtory.rest.api"
+    modelPackage = "io.github.agomezlucena.libtory.rest.model"
+    configOptions = [
+            interfaceOnly: "true",
+            useSpringBoot3: "true",
+            java8: "true",
+            hideGenerationTimestamp: "true"
+    ]
 }

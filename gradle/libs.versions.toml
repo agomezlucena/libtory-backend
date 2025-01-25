@@ -5,6 +5,7 @@ datafakerVersion = "2.+"
 junitVersion = "5.+"
 jspecifyVersion = "1.+"
 mybatisSpringStarterVersion = "3.+"
+openApiGeneratorVersion = "7.10.0"
 
 [libraries]
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockitoVersion" }
@@ -16,3 +17,4 @@ mybatisStarter = { module = "org.mybatis.spring.boot:mybatis-spring-boot-starter
 
 [plugins]
 springBoot = { id = "org.springframework.boot", version.ref = "springBootVersion" }
+openapi = { id = "org.openapi.generator" ,version.ref = "openApiGeneratorVersion"}
