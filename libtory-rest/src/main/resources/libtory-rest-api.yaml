@@ -111,14 +111,6 @@ paths:
         - query
         - books
       parameters:
-        - name: X-Transaction-Id
-          description: "define the transaction id can be omitted in that case the service will generate a new one
-          the main usage for this header is to simplify the debugging in case of failure"
-          in: header
-          required: false
-          schema:
-            type: string
-            format: uuid
         - name: size
           in: query
           description: "define the amount of objects to obtain in a page, if not defined will take the value as 10"
@@ -280,15 +272,6 @@ paths:
         - query
         - books
       parameters:
-        - name: X-Transaction-Id
-          description: "define the transaction id can be omitted in that case the service will generate a new one
-          the main usage for this header is to simplify the debugging in case of failure"
-          in: header
-          required: false
-          schema:
-            type: string
-            format: uuid
-
         - name: isbn
           description: 'isbn 13 of the book that you are searching'
           in: path
@@ -413,14 +396,6 @@ paths:
               value: "978-8431680251"
             isbn without hyphens:
               value: "9788467585025"
-        - name: X-Transaction-Id
-          description: "define the transaction id can be omitted in that case the service will generate a new one
-          the main usage for this header is to simplify the debugging in case of failure"
-          in: header
-          required: false
-          schema:
-            type: string
-            format: uuid
       requestBody:
         description: "payload that allows you to create or update a new book"
         required: true
