@@ -17,12 +17,16 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter"
     implementation "org.springframework.boot:spring-boot-starter-web"
     implementation "org.springframework.boot:spring-boot-starter-jdbc"
+    implementation libs.mybatisStarter
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0"
+    implementation 'org.liquibase:liquibase-core'
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
     implementation 'org.postgresql:postgresql'
+
     testImplementation "org.springframework.boot:spring-boot-starter-test"
 
     implementation project(":libtory-books")
+    implementation project(":libtory-shared")
 }
 
 test {
