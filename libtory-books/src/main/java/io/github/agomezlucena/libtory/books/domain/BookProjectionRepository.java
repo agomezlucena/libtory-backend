@@ -1,11 +1,11 @@
 package io.github.agomezlucena.libtory.books.domain;
 
 import io.github.agomezlucena.libtory.shared.queries.PagedQuery;
-import io.github.agomezlucena.libtory.shared.queries.PagedResult;
+import io.github.agomezlucena.libtory.shared.queries.PaginatedResult;
 
 import java.util.Optional;
 
 public interface BookProjectionRepository {
-    PagedResult<BookProjection> findAllProjections(PagedQuery<BookProjection> query);
+    PaginatedResult<BookProjection> findAllProjections(PagedQuery<BookProjection> query);
     Optional<BookProjection> findProjectionByIsbn(Isbn isbn);
 }

@@ -5,7 +5,7 @@ import io.github.agomezlucena.libtory.books.domain.BookProjectionRepository;
 import io.github.agomezlucena.libtory.books.domain.Isbn;
 import io.github.agomezlucena.libtory.books.infrastructure.database.mappers.BookProjectionMapper;
 import io.github.agomezlucena.libtory.shared.queries.PagedQuery;
-import io.github.agomezlucena.libtory.shared.queries.PagedResult;
+import io.github.agomezlucena.libtory.shared.queries.PaginatedResult;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -19,10 +19,10 @@ public class BookProjectionMybatisRepository implements BookProjectionRepository
     }
 
     @Override
-    public PagedResult<BookProjection> findAllProjections(PagedQuery<BookProjection> query) {
+    public PaginatedResult<BookProjection> findAllProjections(PagedQuery<BookProjection> query) {
         var items = mapper.getAllBooks(query);
         var totalBooks = mapper.countAllBooks();
-        return new PagedResult<>(
+        return new PaginatedResult<>(
                 items,
                 Optional.ofNullable(items).map(Collection::size).orElse(0),
                 totalBooks,

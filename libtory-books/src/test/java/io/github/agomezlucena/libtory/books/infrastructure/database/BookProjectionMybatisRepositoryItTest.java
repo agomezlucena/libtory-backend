@@ -4,7 +4,7 @@ import io.github.agomezlucena.libtory.books.application.BookProjectionPaginatedQ
 import io.github.agomezlucena.libtory.books.domain.Isbn;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension;
 import io.github.agomezlucena.libtory.shared.FakerIsbn;
-import io.github.agomezlucena.libtory.shared.queries.PagedResult;
+import io.github.agomezlucena.libtory.shared.queries.PaginatedResult;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -41,7 +41,7 @@ public class BookProjectionMybatisRepositoryItTest {
     @Test
     @DisplayName("query all the books and return the expected books")
     void queryAllBooksAndReturnExpectedBooks() {
-        var expectedBooks = new PagedResult<>(List.of(createTheIliad()), 1, 3, null, null);
+        var expectedBooks = new PaginatedResult<>(List.of(createTheIliad()), 1, 3, null, null);
 
         var givenQuery = new BookProjectionPaginatedQuery(0, 1, null, null);
         var obtainedValue = bookProjectionMyBatisRepository.findAllProjections(givenQuery);
@@ -51,7 +51,7 @@ public class BookProjectionMybatisRepositoryItTest {
     @Test
     @DisplayName("should return the expected value ordered by the selected field")
     void shouldReturnTheExpectedValueOrderedByTheSelectedField() {
-        var expectedBooks = new PagedResult<>(List.of(createTheGreatGatsby()), 1, 3, "title", "ASC");
+        var expectedBooks = new PaginatedResult<>(List.of(createTheGreatGatsby()), 1, 3, "title", "ASC");
 
         var givenPageRequest = new BookProjectionPaginatedQuery(0, 1, "title", "ASC");
         var obtainedValue = bookProjectionMyBatisRepository.findAllProjections(givenPageRequest);

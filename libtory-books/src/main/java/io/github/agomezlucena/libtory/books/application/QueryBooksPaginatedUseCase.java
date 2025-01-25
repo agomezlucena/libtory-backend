@@ -5,7 +5,7 @@ import io.github.agomezlucena.libtory.books.domain.BookProjectionRepository;
 import io.github.agomezlucena.libtory.shared.queries.*;
 
 public class QueryBooksPaginatedUseCase
-        implements QueryHandler<BookProjectionPaginatedQuery, PagedResult<BookProjection>> {
+        implements QueryHandler<BookProjectionPaginatedQuery, PaginatedResult<BookProjection>> {
 
     private final BookProjectionRepository repository;
 
@@ -14,7 +14,7 @@ public class QueryBooksPaginatedUseCase
     }
 
     @Override
-    public PagedResult<BookProjection> handle(BookProjectionPaginatedQuery query) {
+    public PaginatedResult<BookProjection> handle(BookProjectionPaginatedQuery query) {
         return repository.findAllProjections(query);
     }
 }

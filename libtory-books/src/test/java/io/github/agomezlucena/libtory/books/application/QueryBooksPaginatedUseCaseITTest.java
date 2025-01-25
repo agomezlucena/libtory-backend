@@ -1,6 +1,6 @@
 package io.github.agomezlucena.libtory.books.application;
 
-import io.github.agomezlucena.libtory.shared.queries.PagedResult;
+import io.github.agomezlucena.libtory.shared.queries.PaginatedResult;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +31,7 @@ class QueryBooksPaginatedUseCaseITTest {
     @Test
     @DisplayName("should call to the book repository when is called")
     void shouldCallToTheBookRepositoryWhenIsCalled() {
-        var expectedResult = new PagedResult<>(List.of(createTheIliad()),1,3,null,null);
+        var expectedResult = new PaginatedResult<>(List.of(createTheIliad()),1,3,null,null);
         var givenPagedQuery = new BookProjectionPaginatedQuery(0,1,null,null);
 
         var result = testSubject.handle(givenPagedQuery);
