@@ -5,12 +5,14 @@ import io.github.agomezlucena.libtory.books.application.BookProjectionPaginatedQ
 import io.github.agomezlucena.libtory.books.domain.Author;
 import io.github.agomezlucena.libtory.books.domain.BookPrimitives;
 import io.github.agomezlucena.libtory.books.domain.BookProjection;
+import io.github.agomezlucena.libtory.books.domain.Isbn;
 import io.github.agomezlucena.libtory.rest.model.LibtoryEntity;
 import io.github.agomezlucena.libtory.rest.model.PagedResult;
 import io.github.agomezlucena.libtory.rest.model.Property;
 import io.github.agomezlucena.libtory.shared.cqrs.CommandBus;
 import io.github.agomezlucena.libtory.shared.queries.PaginatedResult;
 import io.github.agomezlucena.libtory.shared.queries.QueryBus;
+import org.apache.commons.text.diff.DeleteCommand;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -54,6 +56,10 @@ public class BookService {
         var isbnQuery = new BookProjectionIsbnQuery(isbn);
         Optional<BookProjection> result = queryBus.handle(isbnQuery);
         return result.map(this::fromBook);
+    }
+
+    public void deleteByIsbn(String isbn) {
+        commandBus.sendCommand(Isbn.fromString(isbn));
     }
 
     private BookPrimitives bookPrimitivesFromEntity(String isbn,LibtoryEntity entity) {

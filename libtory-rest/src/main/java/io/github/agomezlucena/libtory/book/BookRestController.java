@@ -37,4 +37,10 @@ public class BookRestController implements BooksApi {
         bookService.saveBook(isbn,libtoryEntity);
         return ResponseEntity.ok().build();
     }
+
+    @Override
+    public ResponseEntity<Void> booksIsbnDelete(String isbn) {
+        bookService.deleteByIsbn(isbn);
+        return ResponseEntity.noContent().build();
+    }
 }

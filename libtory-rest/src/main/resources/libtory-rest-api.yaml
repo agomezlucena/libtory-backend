@@ -218,7 +218,7 @@ paths:
               examples:
                 Invalid page error:
                   description: 'error caused when the user sent a page lesser than zero this error will not apply when
-                  no parameter is sent because the back-end will'
+                  no parameter is sent'
                   value:
                     transactionId: '30e437ad-c7f2-421a-a2b6-c6f4f5f0d428'
                     code: 'CLIENT_ERROR'
@@ -443,3 +443,31 @@ paths:
         400:
           description: "this error can happen in two cases you pass an invalid isbn or you pass more properties than
           expected"
+    delete:
+      description: allow to remove a book by its isbn
+      parameters:
+        - name: isbn
+          description: 'isbn 13 of the book that you are searching'
+          in: path
+          required: true
+          schema:
+            type: string
+          examples:
+            isbn with hyphens:
+              value: "978-8431680251"
+            isbn without hyphens:
+              value: "9788467585025"
+      responses: 
+        204:
+          description: |
+            deletion was successful.
+        400:
+          description: "when the user send a invalid isbn"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibtoryError'
+              example:
+                transactionId: 'da21bd8a-296b-4084-83dd-e66748677604'
+                code: "CLIENT_ERROR"
+                message: "the given isbn is invalid."
