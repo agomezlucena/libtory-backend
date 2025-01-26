@@ -12,7 +12,6 @@ import io.github.agomezlucena.libtory.rest.model.Property;
 import io.github.agomezlucena.libtory.shared.cqrs.CommandBus;
 import io.github.agomezlucena.libtory.shared.queries.PaginatedResult;
 import io.github.agomezlucena.libtory.shared.queries.QueryBus;
-import org.apache.commons.text.diff.DeleteCommand;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
