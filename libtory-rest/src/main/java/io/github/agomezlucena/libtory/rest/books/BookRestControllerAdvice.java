@@ -4,6 +4,9 @@ import io.github.agomezlucena.libtory.books.domain.InvalidAuthor;
 import io.github.agomezlucena.libtory.books.domain.InvalidIsbn;
 import io.github.agomezlucena.libtory.books.domain.InvalidTitle;
 import io.github.agomezlucena.libtory.rest.model.LibtoryError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,46 +14,43 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 import java.util.*;
 
+import static io.github.agomezlucena.libtory.rest.model.LibtoryError.CodeEnum.*;
+
 @RestControllerAdvice
 public class BookRestControllerAdvice {
-    @ExceptionHandler(InvalidIsbn.class)
-    public ResponseEntity<LibtoryError> handleInvalidIsbn(NativeWebRequest request, InvalidIsbn exception) {
-        var error = new LibtoryError()
-                .transactionId(getTransactionId(request))
-                .code(LibtoryError.CodeEnum.CLIENT_ERROR)
-                .message(exception.getMessage())
-                .localizedMessage(getLocalizedMessage(request.getLocale(), InvalidIsbn.class));
-        return ResponseEntity.badRequest().body(error);
-    }
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    @ExceptionHandler(InvalidTitle.class)
-    public ResponseEntity<LibtoryError> handleInvalidTitle(NativeWebRequest request, InvalidTitle exception) {
+    @ExceptionHandler({InvalidIsbn.class,InvalidTitle.class,InvalidAuthor.class})
+    public ResponseEntity<LibtoryError> handleInvalidIsbn(NativeWebRequest request, Throwable exception) {
         var error = new LibtoryError()
                 .transactionId(getTransactionId(request))
-                .code(LibtoryError.CodeEnum.CLIENT_ERROR)
+                .code(CLIENT_ERROR)
                 .message(exception.getMessage())
-                .localizedMessage(getLocalizedMessage(request.getLocale(), InvalidTitle.class));
+                .localizedMessage(getLocalizedMessage(request.getLocale(), exception.getClass()));
 
         return ResponseEntity.badRequest().body(error);
     }
 
-    @ExceptionHandler(InvalidAuthor.class)
-    public ResponseEntity<LibtoryError> handleInvalidAuthor(NativeWebRequest request, InvalidAuthor exception) {
-        LibtoryError error = new LibtoryError()
+    @ExceptionHandler(BookNotFoundException.class)
+    public ResponseEntity<LibtoryError> handleInvalidTitle(NativeWebRequest request, Throwable exception) {
+        var error = new LibtoryError()
                 .transactionId(getTransactionId(request))
-                .code(LibtoryError.CodeEnum.CLIENT_ERROR)
-                .message("one of the given authors doesn't exists")
-                .localizedMessage(getLocalizedMessage(request.getLocale(), InvalidTitle.class));
+                .code(ENTITY_NOT_FOUND_ERROR)
+                .message(exception.getMessage())
+                .localizedMessage(getLocalizedMessage(request.getLocale(), exception.getClass()));
 
-        return ResponseEntity.badRequest().body(error);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<LibtoryError> handleException(NativeWebRequest request, Exception exception) {
         var error = new LibtoryError()
                 .transactionId(getTransactionId(request))
-                .code(LibtoryError.CodeEnum.SERVER_ERROR)
+                .code(SERVER_ERROR)
                 .message("an unknown error occurred");
+
+        log.error("there was an unknown error caused by: {}",exception.getMessage());
+        log.debug("exception body",exception);
         return ResponseEntity.badRequest().body(error);
     }
 

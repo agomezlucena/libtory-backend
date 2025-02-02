@@ -29,7 +29,7 @@ public class BookRestController implements BooksApi {
     public ResponseEntity<LibtoryEntity> booksIsbnGet(String isbn) {
         return bookService.getByIsbn(isbn)
                 .map(ResponseEntity::ok)
-                .orElseGet(()->ResponseEntity.notFound().build());
+                .orElseThrow(BookNotFoundException::bookNotFoundByIsbn);
     }
 
     @Override
