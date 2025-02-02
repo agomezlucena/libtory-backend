@@ -9,11 +9,7 @@ import io.github.agomezlucena.libtory.books.infrastructure.database.BookSqlRepos
 import io.github.agomezlucena.libtory.books.infrastructure.database.mappers.BookProjectionMapper;
 import io.github.agomezlucena.libtory.shared.cqrs.CommandBus;
 import io.github.agomezlucena.libtory.shared.cqrs.QueryBus;
-import org.postgresql.Driver;
-import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
@@ -25,49 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Configuration
-@ConfigurationProperties(prefix = "books")
 public class BookConfiguration {
-    private String jdbcUrl;
-    private String jdbcUsername;
-    private String jdbcPassword;
-
-    public String getJdbcUrl() {
-        return jdbcUrl;
-    }
-
-    public void setJdbcUrl(String jdbcUrl) {
-        this.jdbcUrl = jdbcUrl;
-    }
-
-    public String getJdbcUsername() {
-        return jdbcUsername;
-    }
-
-    public void setJdbcUsername(String jdbcUsername) {
-        this.jdbcUsername = jdbcUsername;
-    }
-
-    public String getJdbcPassword() {
-        return jdbcPassword;
-    }
-
-    public void setJdbcPassword(String jdbcPassword) {
-        this.jdbcPassword = jdbcPassword;
-    }
-
-
-    @Bean
-    @Qualifier("booksDataSource")
-    public DataSource booksDataSource() {
-        PGSimpleDataSource dataSource = new PGSimpleDataSource();
-        dataSource.setCurrentSchema("books");
-        return DataSourceBuilder.derivedFrom(dataSource)
-                .url(jdbcUrl)
-                .driverClassName(Driver.class.getCanonicalName())
-                .username(jdbcUsername)
-                .password(jdbcPassword)
-                .build();
-    }
 
     @Bean
     @Qualifier("booksIoExecutorService")
@@ -77,9 +31,7 @@ public class BookConfiguration {
 
     @Bean
     @Qualifier("booksNamedParameterOperations")
-    public NamedParameterJdbcOperations booksNamedParameterOperations(
-            @Qualifier("booksDataSource") DataSource dataSource
-    ){
+    public NamedParameterJdbcOperations booksNamedParameterOperations(DataSource dataSource){
         return new NamedParameterJdbcTemplate(dataSource);
     }
 
