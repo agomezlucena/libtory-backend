@@ -37,7 +37,6 @@ components:
             - "ASC"
             - "DESC"
 
-
     Property:
       type: object
       properties:
@@ -59,7 +58,10 @@ components:
         type:
           description: "represent the type of entity"
           type: string
-          enum: [ Book,Author ]
+          enum:
+            - Book
+            - Author
+            - Operation
         url:
           description: "is the url for working with that entity"
           type: string
@@ -98,10 +100,10 @@ components:
         message:
           description: "represent the error message in plain english"
           type: string
+
         localizedMessage:
           description: "represent the error message in the language of the user if we don't have it will be null"
           type: string
-          nullable: true
 
 paths:
   /books:
@@ -445,6 +447,9 @@ paths:
           expected"
     delete:
       description: allow to remove a book by its isbn
+      tags:
+        - books
+        - delete
       parameters:
         - name: isbn
           description: 'isbn 13 of the book that you are searching'
@@ -457,7 +462,7 @@ paths:
               value: "978-8431680251"
             isbn without hyphens:
               value: "9788467585025"
-      responses: 
+      responses:
         204:
           description: |
             deletion was successful.
@@ -471,3 +476,154 @@ paths:
                 transactionId: 'da21bd8a-296b-4084-83dd-e66748677604'
                 code: "CLIENT_ERROR"
                 message: "the given isbn is invalid."
+
+  /books/{isbn}/authors:
+    post:
+      description: |
+        allows to add authors to a book
+      tags:
+        - creation
+        - books
+        - authors
+      parameters:
+        - name: isbn
+          in: path
+          required: true
+          schema:
+            type: string
+          examples:
+            isbn with hyphens:
+              value: "978-8431680251"
+            isbn without hyphens:
+              value: "9788467585025"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LibtoryEntity'
+            example:
+              id: '2b540bc2-1a5f-4068-bb8c-344c3f3a29b6'
+              type: Operation
+              properties:
+                - field: "authors"
+                  value:
+                    - '89707eaa-fffe-4b35-82a7-acb91d8851b8'
+                    - 'd46856e3-7702-4773-b6cf-66ca66ce4e32'
+      responses:
+        200:
+          description: |
+            the authors were added successfully
+        400:
+          description: |
+            the request was invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibtoryError'
+              examples:
+                some of the given author ids don't exists:
+                  value:
+                    transactionId: 'da21bd8a-296b-4084-83dd-e66748677604'
+                    code: "CLIENT_ERROR"
+                    message: "some of the given authors is not registered."
+
+                invalid isbn:
+                  value:
+                    transactionId: 'da21bd8a-296b-4084-83dd-e66748677604'
+                    code: "CLIENT_ERROR"
+                    message: "the given isbn is invalid."
+
+                have another type distinct to Operation:
+                  value:
+                    transactionId: 'da21bd8a-296b-4084-83dd-e66748677604'
+                    code: "CLIENT_ERROR"
+                    message: "the type is not supported by this endpoint invalid."
+
+                field authors doesn't exists or is null or is empty:
+                  value:
+                    transactionId: 'da21bd8a-296b-4084-83dd-e66748677604'
+                    code: "CLIENT_ERROR"
+                    message: "required property author doesn't exists is empty or is null"
+        404:
+          description: |
+            the queried book doesn't exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibtoryError'
+              example:
+                transactionId: '26b7e332-a03a-4545-b326-d0a24e6f2ed3'
+                code: 'ENTITY_NOT_FOUND_ERROR'
+                message: "the given isbn is not associated to any book in our library."
+    delete:
+      description: |
+        allows to delete different authors from a book
+      tags:
+        - delete
+        - books
+        - authors
+
+      parameters:
+        - name: isbn
+          in: path
+          required: true
+          schema:
+            type: string
+          examples:
+            isbn with hyphens:
+              value: "978-8431680251"
+            isbn without hyphens:
+              value: "9788467585025"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LibtoryEntity'
+            example:
+              id: '2b540bc2-1a5f-4068-bb8c-344c3f3a29b6'
+              type: Operation
+              properties:
+                - field: "authors"
+                  value:
+                    - '89707eaa-fffe-4b35-82a7-acb91d8851b8'
+                    - 'd46856e3-7702-4773-b6cf-66ca66ce4e32'
+      responses:
+        200:
+          description: |
+            the authors were removed successfully
+        400:
+          description: |
+            the request was invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibtoryError'
+              examples:
+                invalid isbn:
+                  value:
+                    transactionId: 'da21bd8a-296b-4084-83dd-e66748677604'
+                    code: "CLIENT_ERROR"
+                    message: "the given isbn is invalid."
+
+                have another type distinct to Operation:
+                  value:
+                    transactionId: 'da21bd8a-296b-4084-83dd-e66748677604'
+                    code: "CLIENT_ERROR"
+                    message: "the type is not supported by this endpoint invalid."
+
+                field authors doesn't exists or is null or is empty:
+                  value:
+                    transactionId: 'da21bd8a-296b-4084-83dd-e66748677604'
+                    code: "CLIENT_ERROR"
+                    message: "required property author doesn't exists is empty or is null"
+        404:
+          description: |
+            the queried book doesn't exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibtoryError'
+              example:
+                transactionId: '26b7e332-a03a-4545-b326-d0a24e6f2ed3'
+                code: 'ENTITY_NOT_FOUND_ERROR'
+                message: "the given isbn is not associated to any book in our library."
