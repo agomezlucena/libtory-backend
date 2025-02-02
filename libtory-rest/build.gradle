@@ -22,11 +22,16 @@ dependencies {
     implementation 'org.liquibase:liquibase-core'
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
     implementation 'org.postgresql:postgresql'
-
-    testImplementation "org.springframework.boot:spring-boot-starter-test"
-
     implementation project(":libtory-books")
     implementation project(":libtory-shared")
+
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.liquibase:liquibase-core'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation libs.restAssureMockMvc
 }
 
 test {

@@ -6,6 +6,7 @@ junitVersion = "5.+"
 jspecifyVersion = "1.+"
 mybatisSpringStarterVersion = "3.+"
 openApiGeneratorVersion = "7.10.0"
+restAssuredVersion = "5.5.0"
 
 [libraries]
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockitoVersion" }
@@ -14,6 +15,7 @@ junit = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junitVersio
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecifyVersion" }
 springBootBom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBootVersion" }
 mybatisStarter = { module = "org.mybatis.spring.boot:mybatis-spring-boot-starter", version.ref = "mybatisSpringStarterVersion"}
+restAssureMockMvc = {module = "io.rest-assured:spring-mock-mvc", version.ref = "restAssuredVersion"}
 
 [plugins]
 springBoot = { id = "org.springframework.boot", version.ref = "springBootVersion" }
