@@ -1,15 +1,29 @@
 package io.github.agomezlucena.libtory.shared.cqrs;
 
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public interface CommandHandler <T>{
+public interface CommandHandler<T> {
+
     void handleCommand(T command);
-    default boolean canHandle(Class<?> command){
+
+    default boolean canHandle(Class<?> commandClass) {
         return Stream.of(getClass().getGenericInterfaces())
-                .filter(ParameterizedType.class::isInstance)
-                .filter(it -> CommandHandler.class.equals(((ParameterizedType) it).getRawType()))
-                .map(it -> ((ParameterizedType) it).getActualTypeArguments()[0])
-                .anyMatch(it -> it.equals(command));
+                .mapMulti(this::extractFirstGenericElement)
+                .anyMatch(it -> it.equals(commandClass));
+    }
+
+    private void extractFirstGenericElement(Type type, Consumer<Type> consumer) {
+        if(!(type instanceof ParameterizedType parameterizedType)){
+            return;
+        }
+
+        if(! CommandHandler.class.equals(parameterizedType.getRawType())){
+            return;
+        }
+
+        consumer.accept(parameterizedType.getActualTypeArguments()[0]);
     }
 }

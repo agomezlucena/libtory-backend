@@ -1,4 +1,4 @@
-package io.github.agomezlucena.libtory.shared.queries;
+package io.github.agomezlucena.libtory.shared.cqrs;
 
 public interface PagedQuery<T> extends Query<T>{
     int getPage();

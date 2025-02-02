@@ -1,8 +1,7 @@
-package io.github.agomezlucena.libtory.shared.queries;
+package io.github.agomezlucena.libtory.shared.cqrs;
 
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public record PaginatedResult<T> (
         List<T> items,

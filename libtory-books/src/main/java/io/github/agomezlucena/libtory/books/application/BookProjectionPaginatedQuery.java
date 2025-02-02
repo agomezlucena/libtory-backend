@@ -1,7 +1,7 @@
 package io.github.agomezlucena.libtory.books.application;
 
 import io.github.agomezlucena.libtory.books.domain.BookProjection;
-import io.github.agomezlucena.libtory.shared.queries.AbstractPagedQuery;
+import io.github.agomezlucena.libtory.shared.cqrs.AbstractPagedQuery;
 
 import java.util.Objects;
 import java.util.Set;

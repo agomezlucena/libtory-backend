@@ -4,7 +4,7 @@ import io.github.agomezlucena.libtory.books.application.BookProjectionPaginatedQ
 import io.github.agomezlucena.libtory.books.domain.Isbn;
 import io.github.agomezlucena.libtory.shared.DataFakerExtension;
 import io.github.agomezlucena.libtory.shared.FakerIsbn;
-import io.github.agomezlucena.libtory.shared.queries.PaginatedResult;
+import io.github.agomezlucena.libtory.shared.cqrs.PaginatedResult;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;

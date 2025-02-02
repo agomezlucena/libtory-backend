@@ -1,4 +1,4 @@
-package io.github.agomezlucena.libtory.shared.queries;
+package io.github.agomezlucena.libtory.shared.cqrs;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -86,7 +86,7 @@ class PagedQueryTest {
 
     }
 
-    public class TestPagedQuery extends AbstractPagedQuery<Object> {
+    public static class TestPagedQuery extends AbstractPagedQuery<Object> {
 
         public TestPagedQuery(Integer page, Integer size, String sortingField, String sortingDirection) {
             super(page, size, sortingField, sortingDirection);

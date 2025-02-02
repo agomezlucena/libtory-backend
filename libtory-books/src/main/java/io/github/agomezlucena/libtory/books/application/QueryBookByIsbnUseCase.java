@@ -2,7 +2,7 @@ package io.github.agomezlucena.libtory.books.application;
 
 import io.github.agomezlucena.libtory.books.domain.BookProjection;
 import io.github.agomezlucena.libtory.books.domain.BookProjectionRepository;
-import io.github.agomezlucena.libtory.shared.queries.QueryHandler;
+import io.github.agomezlucena.libtory.shared.cqrs.QueryHandler;
 
 import java.util.Optional;
 

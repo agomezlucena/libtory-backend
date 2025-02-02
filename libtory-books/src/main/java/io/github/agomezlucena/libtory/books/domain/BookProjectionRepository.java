@@ -1,7 +1,7 @@
 package io.github.agomezlucena.libtory.books.domain;
 
-import io.github.agomezlucena.libtory.shared.queries.PagedQuery;
-import io.github.agomezlucena.libtory.shared.queries.PaginatedResult;
+import io.github.agomezlucena.libtory.shared.cqrs.PagedQuery;
+import io.github.agomezlucena.libtory.shared.cqrs.PaginatedResult;
 
 import java.util.Optional;
 

@@ -18,7 +18,7 @@ class CommandBusTest {
                 givenHandler.getClass().getSimpleName()
         );
         var exception = assertThrows(
-                IllegalArgumentException.class,
+                CqrsError.class,
                 () -> testSubject.addHandler(Integer.class,givenHandler)
         );
 
@@ -32,7 +32,7 @@ class CommandBusTest {
         var testSubject = CommandBus.getNewCommandBus();
         var expectedMessage = "not handler found for command: Integer";
         var obtainedException = assertThrows(
-                IllegalArgumentException.class,
+                CqrsError.class,
                 ()-> testSubject.sendCommand(1)
         );
         assertEquals(expectedMessage,obtainedException.getMessage());

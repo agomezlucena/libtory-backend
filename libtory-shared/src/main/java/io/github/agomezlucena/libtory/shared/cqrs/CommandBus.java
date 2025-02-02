@@ -1,7 +1,6 @@
 package io.github.agomezlucena.libtory.shared.cqrs;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class CommandBus {
@@ -11,20 +10,19 @@ public final class CommandBus {
         return new CommandBus();
     }
 
+    @SuppressWarnings("unchecked")
     public <T> void sendCommand (T command){
-        var handler = Optional.ofNullable(handlers.get(command.getClass()))
-                .map(it -> (CommandHandler<T>) it)
-                .orElseThrow(()-> new IllegalArgumentException(
-                        "not handler found for command: "+
-                                command.getClass().getSimpleName())
-                );
-
+        var handler = (CommandHandler<T>) handlers.get(command.getClass());
+        if(handler == null){
+            throw new CqrsError("not handler found for command: "+ command.getClass().getSimpleName());
+        }
+        
         handler.handleCommand(command);
     }
 
     public CommandBus addHandler(Class<?> commandClassToHandle, CommandHandler<?> handler){
         if (!handler.canHandle(commandClassToHandle)){
-            throw new IllegalArgumentException(
+            throw new CqrsError(
                     String.format("handler: %s can not handle command: %s",
                     handler.getClass().getSimpleName(),
                     commandClassToHandle.getSimpleName())

@@ -1,6 +1,6 @@
 package io.github.agomezlucena.libtory.books.application;
 
-import io.github.agomezlucena.libtory.shared.queries.PaginatedResult;
+import io.github.agomezlucena.libtory.shared.cqrs.PaginatedResult;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;

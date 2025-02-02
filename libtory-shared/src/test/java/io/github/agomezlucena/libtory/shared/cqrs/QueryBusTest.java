@@ -1,4 +1,4 @@
-package io.github.agomezlucena.libtory.shared.queries;
+package io.github.agomezlucena.libtory.shared.cqrs;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +40,16 @@ class QueryBusTest {
 
         var obtainedValue = testSubject.handle(new TestEntityPagedQuery(0,1,null,null));
         assertEquals(expectedValue, obtainedValue);
+    }
+
+    @Test
+    @DisplayName("should throw when then query bus doesn't have a handler for the given query")
+    void shouldThrowWhenThenQueryBusDoesNotHaveAHandlerForTheGivenQuery() {
+        var testSubject = new QueryBus();
+        var expectedErrorMessage = "the query is not supported in this bus";
+        var obtainedException = assertThrows(CqrsError.class, ()-> testSubject.handle(mock(PagedQuery.class)))
+                .getMessage();
+        assertEquals(expectedErrorMessage,obtainedException);
     }
 
     private record TestEntity(int id, String name) {}

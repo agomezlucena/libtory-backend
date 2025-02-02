@@ -2,7 +2,8 @@ package io.github.agomezlucena.libtory.books.application;
 
 import io.github.agomezlucena.libtory.books.domain.BookProjection;
 import io.github.agomezlucena.libtory.books.domain.BookProjectionRepository;
-import io.github.agomezlucena.libtory.shared.queries.*;
+import io.github.agomezlucena.libtory.shared.cqrs.PaginatedResult;
+import io.github.agomezlucena.libtory.shared.cqrs.QueryHandler;
 
 public class QueryBooksPaginatedUseCase
         implements QueryHandler<BookProjectionPaginatedQuery, PaginatedResult<BookProjection>> {

@@ -58,7 +58,7 @@
 
     <select id="getAllBooks"
             statementType="PREPARED"
-            parameterType="io.github.agomezlucena.libtory.shared.queries.PagedQuery"
+            parameterType="io.github.agomezlucena.libtory.shared.cqrs.PagedQuery"
             resultMap="BookProjectionResultMap"
     >
         <include refid="selectBookProjection"/>

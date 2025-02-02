@@ -1,4 +1,4 @@
-package io.github.agomezlucena.libtory.shared.queries;
+package io.github.agomezlucena.libtory.shared.cqrs;
 
 import java.util.Optional;
 import java.util.Set;

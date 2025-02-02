@@ -8,7 +8,7 @@ import io.github.agomezlucena.libtory.books.infrastructure.database.BookQueries;
 import io.github.agomezlucena.libtory.books.infrastructure.database.BookSqlRepository;
 import io.github.agomezlucena.libtory.books.infrastructure.database.mappers.BookProjectionMapper;
 import io.github.agomezlucena.libtory.shared.cqrs.CommandBus;
-import io.github.agomezlucena.libtory.shared.queries.QueryBus;
+import io.github.agomezlucena.libtory.shared.cqrs.QueryBus;
 import org.postgresql.Driver;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,6 +21,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Configuration
 @ConfigurationProperties(prefix = "books")
@@ -68,6 +70,12 @@ public class BookConfiguration {
     }
 
     @Bean
+    @Qualifier("booksIoExecutorService")
+    ExecutorService booksIoExecutorService() {
+        return Executors.newVirtualThreadPerTaskExecutor();
+    }
+
+    @Bean
     @Qualifier("booksNamedParameterOperations")
     public NamedParameterJdbcOperations booksNamedParameterOperations(
             @Qualifier("booksDataSource") DataSource dataSource
@@ -90,9 +98,10 @@ public class BookConfiguration {
 
     @Bean
     BookProjectionRepository bookProjectionRepository(
-            BookProjectionMapper bookProjectionMapper
+            BookProjectionMapper bookProjectionMapper,
+            @Qualifier("booksIoExecutorService") ExecutorService executorService
     ){
-        return new BookProjectionMybatisRepository(bookProjectionMapper);
+        return new BookProjectionMybatisRepository(bookProjectionMapper,executorService);
     }
 
     @Bean
@@ -138,7 +147,7 @@ public class BookConfiguration {
             UpdateBookAuthorsUseCase authorsUseCase,
             DeleteBookByIsbnUseCase deleteBookByIsbnUseCase
     ) {
-        return new CommandBus()
+        return CommandBus.getNewCommandBus()
                 .addHandler(BookPrimitives.class,updateBookUseCase)
                 .addHandler(UpdateAuthorsCommand.class,authorsUseCase)
                 .addHandler(Isbn.class,deleteBookByIsbnUseCase);

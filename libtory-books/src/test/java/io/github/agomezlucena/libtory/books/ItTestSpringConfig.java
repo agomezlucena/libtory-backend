@@ -21,13 +21,19 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import javax.sql.DataSource;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @SpringBootApplication
 public class ItTestSpringConfig {
     public static void main(String[] args) {
         SpringApplication.run(ItTestSpringConfig.class, args);
+    }
+
+    @Bean
+    ExecutorService ioExecutor(){
+        return Executors.newVirtualThreadPerTaskExecutor();
     }
 
     @Bean
@@ -50,8 +56,11 @@ public class ItTestSpringConfig {
     }
 
     @Bean
-    BookProjectionMybatisRepository bookProjectionSqlRepository(BookProjectionMapper mapper) {
-        return new BookProjectionMybatisRepository(mapper);
+    BookProjectionMybatisRepository bookProjectionSqlRepository(
+            BookProjectionMapper mapper,
+            ExecutorService ioExecutor
+    ) {
+        return new BookProjectionMybatisRepository(mapper,ioExecutor);
     }
 
     @Bean
@@ -81,8 +90,6 @@ public class ItTestSpringConfig {
 
     @Bean
     CommandLineRunner runner(){
-        return args -> {
-            org.apache.ibatis.logging.LogFactory.useSlf4jLogging();
-        };
+        return args -> org.apache.ibatis.logging.LogFactory.useSlf4jLogging();
     }
 }

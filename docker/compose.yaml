@@ -1,0 +1,7 @@
+services:
+  libtory-db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    env_file:
+      - assets/secrets/postgres-secret.env
