@@ -1,4 +1,4 @@
-package io.github.agomezlucena.libtory.book;
+package io.github.agomezlucena.libtory.rest.books;
 
 import io.github.agomezlucena.libtory.books.application.BookProjectionIsbnQuery;
 import io.github.agomezlucena.libtory.books.application.BookProjectionPaginatedQuery;
