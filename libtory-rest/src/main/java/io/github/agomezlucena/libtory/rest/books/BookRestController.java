@@ -15,7 +15,25 @@ public class BookRestController implements BooksApi {
     }
 
     @Override
-    public ResponseEntity<PagedResult> booksGet(
+    public ResponseEntity<Void> addAuthorsToBook(String isbn, LibtoryEntity libtoryEntity) {
+        return BooksApi.super.addAuthorsToBook(isbn, libtoryEntity);
+    }
+
+    @Override
+    public ResponseEntity<Void> addBook(String isbn, LibtoryEntity libtoryEntity) {
+        bookService.saveBook(isbn,libtoryEntity);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<LibtoryEntity> findBookByIsbn(String isbn) {
+        return bookService.getByIsbn(isbn)
+                .map(ResponseEntity::ok)
+                .orElseThrow(BookNotFoundException::bookNotFoundByIsbn);
+    }
+
+    @Override
+    public ResponseEntity<PagedResult> getAllBookPaginated(
             Integer size,
             Integer page,
             String sortingField,
@@ -26,21 +44,14 @@ public class BookRestController implements BooksApi {
     }
 
     @Override
-    public ResponseEntity<LibtoryEntity> booksIsbnGet(String isbn) {
-        return bookService.getByIsbn(isbn)
-                .map(ResponseEntity::ok)
-                .orElseThrow(BookNotFoundException::bookNotFoundByIsbn);
+    public ResponseEntity<Void> removeAuthorsFromBook(String isbn, LibtoryEntity libtoryEntity) {
+        return BooksApi.super.removeAuthorsFromBook(isbn, libtoryEntity);
     }
 
     @Override
-    public ResponseEntity<Void> booksIsbnPut(String isbn, LibtoryEntity libtoryEntity) {
-        bookService.saveBook(isbn,libtoryEntity);
-        return ResponseEntity.ok().build();
-    }
-
-    @Override
-    public ResponseEntity<Void> booksIsbnDelete(String isbn) {
+    public ResponseEntity<Void> removeBook(String isbn) {
         bookService.deleteByIsbn(isbn);
         return ResponseEntity.noContent().build();
     }
+
 }

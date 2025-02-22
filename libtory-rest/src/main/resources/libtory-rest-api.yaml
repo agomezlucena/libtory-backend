@@ -108,6 +108,7 @@ components:
 paths:
   /books:
     get:
+      operationId: getAllBookPaginated
       description: "allows you to query in a paginated way a list of books"
       tags:
         - query
@@ -269,6 +270,7 @@ paths:
 
   /books/{isbn}:
     get:
+      operationId: findBookByIsbn
       description: "allows you to query a book by isbn 13 will cause a 400 error if you pass an invalid isbn"
       tags:
         - query
@@ -372,16 +374,17 @@ paths:
                 code: 'SERVER_ERROR'
                 message: 'An unknown error occurred.'
     put:
+      operationId: addBook
       description: |
         # Book creation and update operation:
         the goal is to provide a idempotent way of creating or updating a book.
         ## expected properties:
           - **title**: a string that represent the title of the book
-          - **sypnosis**: a short text that represent a little resume of not more than 100 words of the book
         ## expected related entities:
           - **Author**: you will only need to put the id of the authors and the type.
         
-        The operation will fail if you add more data than the expected and will give you an 400 error.
+        The operation will ignore any extra properties.
+        The operation will fail if the given author is one not registered.
       tags:
         - books
         - creation
@@ -445,7 +448,28 @@ paths:
         400:
           description: "this error can happen in two cases you pass an invalid isbn or you pass more properties than
           expected"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibtoryError'
+              examples:
+                invalid isbn:
+                  value:
+                    transactionId: 1bdc7a9f-8e66-42a7-a84a-ed58d05ad1da
+                    code: CLIENT_ERROR
+                    message: 'ISBN: abc is invalid'
+                invalid title:
+                  value:
+                    transactionId: 4128a5d8-0ecd-4bff-86e3-c5f5bd62fb40
+                    code: CLIENT_ERROR
+                    message: 'given title is invalid'
+                related author doesn't exists:
+                  value:
+                    transactionId: 78333a26-51b7-43cb-b3dc-ac63b57b72f6
+                    code: CLIENT_ERROR
+                    message: 'At least one of the given authors is not registered in our system.'
     delete:
+      operationId: removeBook
       description: allow to remove a book by its isbn
       tags:
         - books
@@ -479,6 +503,7 @@ paths:
 
   /books/{isbn}/authors:
     post:
+      operationId: addAuthorsToBook
       description: |
         allows to add authors to a book
       tags:
@@ -556,6 +581,7 @@ paths:
                 code: 'ENTITY_NOT_FOUND_ERROR'
                 message: "the given isbn is not associated to any book in our library."
     delete:
+      operationId: removeAuthorsFromBook
       description: |
         allows to delete different authors from a book
       tags:
