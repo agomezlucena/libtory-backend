@@ -12,6 +12,10 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    mockitoAgent
+}
+
 dependencies {
     implementation platform(libs.springBootBom)
     implementation "org.springframework.boot:spring-boot-starter"
@@ -32,10 +36,15 @@ dependencies {
     testImplementation 'org.liquibase:liquibase-core'
     testImplementation 'org.testcontainers:postgresql'
     testImplementation libs.restAssureMockMvc
+    testImplementation (libs.mockito)
+    mockitoAgent(libs.mockito) {
+        transitive = false
+    }
 }
 
 test {
     useJUnitPlatform()
+    jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
 }
 
 sourceSets.main.java.srcDirs += "${layout.buildDirectory.get()}/generated/src/main/java"
